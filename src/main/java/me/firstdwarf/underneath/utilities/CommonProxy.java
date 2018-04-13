@@ -1,7 +1,10 @@
 package me.firstdwarf.underneath.utilities;
 
+import me.firstdwarf.underneath.block.BlockMain;
+import me.firstdwarf.underneath.block.NaturalBlock;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -22,10 +25,15 @@ public class CommonProxy {
 	}
 	@SubscribeEvent
 	public static void registerBlocks(RegistryEvent.Register<Block> event)	{
-		
+		BlockMain.createBlocks();
+		for(NaturalBlock block : BlockMain.naturalBlockList)	{
+			event.getRegistry().register(block);
+		}
 	}
 	@SubscribeEvent
 	public static void registerItems(RegistryEvent.Register<Item> event)	{
-		
+		for(NaturalBlock block : BlockMain.naturalBlockList)	{
+			event.getRegistry().register(new ItemBlock(block).setRegistryName(block.getRegistryName()));
+		}
 	}
 }

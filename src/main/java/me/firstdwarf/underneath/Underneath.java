@@ -3,14 +3,14 @@ package me.firstdwarf.underneath;
 import org.apache.logging.log4j.Logger;
 
 import me.firstdwarf.underneath.utilities.CommonProxy;
+import me.firstdwarf.underneath.utilities.CustomTab;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid = Underneath.MODID, name = Underneath.NAME, version = Underneath.VERSION, 
-	dependencies = "required-after:forge@[14.23.2.2654)", useMetadata = true)
+@Mod(modid = Underneath.MODID, name = Underneath.NAME, version = Underneath.VERSION, useMetadata = true)
 public class Underneath {
 	public static final String MODID = "underneath";
 	public static final String NAME = "underneath";
@@ -24,6 +24,7 @@ public class Underneath {
 	public static Underneath instance;
 	
 	public Logger logger;
+	public static final CustomTab underneathTab = new CustomTab("Main Tab");
 	
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent e)	{
