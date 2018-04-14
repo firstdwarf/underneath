@@ -21,19 +21,23 @@ public class BlockMain {
 	@GameRegistry.ObjectHolder("underneath:exampleblock")
 	public static NaturalBlock exampleBlock;
 	
+	@GameRegistry.ObjectHolder("underneath:orecopper")
+	public static OreBlock oreCopper;
+	
 	/**
 	 * Call the setup method to initialize every new block added
-	 * Current syntax: field, name of field
+	 * Current syntax: field, name of field (camelCase), hardness, blast resistance, light opacity, required tool type
 	 */
 	public static void createBlocks()	{
-		setup(exampleBlock, "exampleBlock");
+		setup(exampleBlock, "exampleBlock", 20f, 20F, 255, "pickaxe");
+		setup(oreCopper, "oreCopper", 20f, 20f, 255, "pickaxe");
 	}
-	public static void setup(NaturalBlock block, String name)	{
-		block = new NaturalBlock(name);
+	public static void setup(NaturalBlock block, String name, float hardness, float resistance, int opacity, String toolType)	{
+		block = new NaturalBlock(name, hardness, resistance, opacity, toolType);
 		naturalBlockList.add(block);
 	}
-	public static void setup(OreBlock block, String name)	{
-		block = new OreBlock();
+	public static void setup(OreBlock block, String name, float hardness, float resistance, int opacity, String toolType)	{
+		block = new OreBlock(name, hardness, resistance, opacity, toolType);
 		oreBlockList.add(block);
 	}
 }

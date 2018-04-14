@@ -1,4 +1,4 @@
-package me.firstdwarf.underneath;
+package me.firstdwarf.underneath.core;
 
 import org.apache.logging.log4j.Logger;
 
@@ -24,7 +24,7 @@ public class Underneath {
 	public static Underneath instance;
 	
 	public Logger logger;
-	public static final CustomTab underneathTab = new CustomTab("Main Tab");
+	public static final CustomTab underneathTab = new CustomTab("underneathBlocks");
 	
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent e)	{

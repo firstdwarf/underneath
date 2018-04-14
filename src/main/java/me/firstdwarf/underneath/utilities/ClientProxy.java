@@ -2,6 +2,7 @@ package me.firstdwarf.underneath.utilities;
 
 import me.firstdwarf.underneath.block.BlockMain;
 import me.firstdwarf.underneath.block.NaturalBlock;
+import me.firstdwarf.underneath.block.OreBlock;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -20,6 +21,10 @@ public class ClientProxy extends CommonProxy	{
 	@SubscribeEvent
 	public static void registerModels(ModelRegistryEvent e)	{
 		for(NaturalBlock block : BlockMain.naturalBlockList)	{
+			ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, 
+					new ModelResourceLocation(block.getRegistryName(), "inventory"));
+		}
+		for(OreBlock block : BlockMain.oreBlockList)	{
 			ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, 
 					new ModelResourceLocation(block.getRegistryName(), "inventory"));
 		}

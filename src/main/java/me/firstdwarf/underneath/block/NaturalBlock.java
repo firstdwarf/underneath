@@ -1,14 +1,19 @@
 package me.firstdwarf.underneath.block;
 
-import me.firstdwarf.underneath.Underneath;
+import me.firstdwarf.underneath.core.Underneath;
+import me.firstdwarf.underneath.utilities.CustomMaterial;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 
 public class NaturalBlock extends Block	{
-	public NaturalBlock(String name) {
-		super(Material.ROCK);
+	
+	public NaturalBlock(String name, float hardness, float resistance, int opacity, String toolType) {
+		super(CustomMaterial.NATURAL);
 		this.setUnlocalizedName("underneath." + name.toLowerCase());
 		this.setRegistryName(name.toLowerCase());
 		this.setCreativeTab(Underneath.underneathTab);
+		this.setHardness(hardness);
+		this.setResistance(resistance);
+		this.setLightOpacity(opacity);
+		this.setHarvestLevel(toolType, 3);
 	}
 }
