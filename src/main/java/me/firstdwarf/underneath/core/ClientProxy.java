@@ -1,4 +1,4 @@
-package me.firstdwarf.underneath.utilities;
+package me.firstdwarf.underneath.core;
 
 import me.firstdwarf.underneath.block.BlockMain;
 import me.firstdwarf.underneath.block.NaturalBlock;

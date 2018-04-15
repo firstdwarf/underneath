@@ -4,29 +4,15 @@ import me.firstdwarf.underneath.block.BlockMain;
 import me.firstdwarf.underneath.block.NaturalBlock;
 import me.firstdwarf.underneath.block.OreBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.oredict.OreDictionary;
 
-@Mod.EventBusSubscriber
-public class CommonProxy {
-	public void preInit(FMLPreInitializationEvent e)	{
-		for(OreBlock block : BlockMain.oreBlockList)	{
-			OreDictionary.registerOre(block.getName(), block);
-		}
-	}
-	public void init(FMLInitializationEvent e)	{
-		
-	}
-	public void postInit(FMLPostInitializationEvent e)	{
-		
-	}
+public class EventHandler {
 	@SubscribeEvent
 	public static void registerBlocks(RegistryEvent.Register<Block> event)	{
 		BlockMain.createBlocks();
@@ -44,6 +30,15 @@ public class CommonProxy {
 		}
 		for(OreBlock block : BlockMain.oreBlockList)	{
 			event.getRegistry().register(new ItemBlock(block).setRegistryName(block.getRegistryName()));
+		}
+	}
+	@SubscribeEvent
+	public static void breakBlocks(BreakSpeed event)	{
+		EntityPlayer player = event.getEntityPlayer();
+		String toolMain = player.getHeldItemMainhand().getDisplayName();
+		String toolOff = player.getHeldItemOffhand().getDisplayName();
+		if(event.getState().getMaterial().equals((Material) CustomMaterial.NATURAL))	{
+			System.out.println(toolMain + " " + toolOff);
 		}
 	}
 }

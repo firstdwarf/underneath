@@ -2,7 +2,6 @@ package me.firstdwarf.underneath.core;
 
 import org.apache.logging.log4j.Logger;
 
-import me.firstdwarf.underneath.utilities.CommonProxy;
 import me.firstdwarf.underneath.utilities.CustomTab;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -16,8 +15,8 @@ public class Underneath {
 	public static final String NAME = "underneath";
 	public static final String VERSION = "0.1";
 	
-	@SidedProxy(clientSide = "me.firstdwarf.underneath.utilities.ClientProxy", 
-			serverSide = "me.firstdwarf.underneath.utilities.ServerProxy")
+	@SidedProxy(clientSide = "me.firstdwarf.underneath.core.ClientProxy", 
+			serverSide = "me.firstdwarf.underneath.core.CommonProxy")
 	public static CommonProxy proxy;
 	
 	@Mod.Instance
