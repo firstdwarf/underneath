@@ -1,16 +1,18 @@
 package me.firstdwarf.underneath.core;
 
-import org.apache.logging.log4j.Logger;
-
+import me.firstdwarf.underneath.command.TeleportWorldCommand;
 import me.firstdwarf.underneath.utilities.CustomTab;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import org.apache.logging.log4j.Logger;
 
 @Mod(modid = Underneath.MODID, name = Underneath.NAME, version = Underneath.VERSION, useMetadata = true)
 public class Underneath {
+
 	public static final String MODID = "underneath";
 	public static final String NAME = "underneath";
 	public static final String VERSION = "0.1";
@@ -23,6 +25,12 @@ public class Underneath {
 	public static Underneath instance;
 	
 	public Logger logger;
+
+	@Mod.EventHandler
+    public void serverLoad(FMLServerStartingEvent e) {
+	    e.registerServerCommand(new TeleportWorldCommand());
+    }
+
 	public static final CustomTab underneathTab = new CustomTab("underneathBlocks");
 	
 	@Mod.EventHandler
@@ -33,7 +41,7 @@ public class Underneath {
 	
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent e)	{
-		proxy.init(e);
+        proxy.init(e);
 	}
 	
 	@Mod.EventHandler

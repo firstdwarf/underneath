@@ -13,11 +13,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 @Mod.EventBusSubscriber(Side.CLIENT)
-public class ClientProxy extends CommonProxy	{
+public class ClientProxy extends CommonProxy {
+
 	@Override
 	public void preInit(FMLPreInitializationEvent e)	{
 		super.preInit(e);
 	}
+
 	@SubscribeEvent
 	public static void registerModels(ModelRegistryEvent e)	{
 		for(NaturalBlock block : BlockMain.naturalBlockList)	{
