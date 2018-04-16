@@ -1,6 +1,6 @@
 package me.firstdwarf.underneath.world;
 
-import me.firstdwarf.underneath.Underneath;
+import me.firstdwarf.underneath.core.Underneath;
 import net.minecraft.world.DimensionType;
 import net.minecraftforge.common.DimensionManager;
 import org.apache.logging.log4j.Level;
