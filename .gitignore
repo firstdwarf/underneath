@@ -28,8 +28,6 @@ gradle-app.setting
 
 # # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
 # gradle/wrapper/gradle-wrapper.properties
-<<<<<<< HEAD
-=======
 
 .classpath
 .metadata
@@ -39,4 +37,3 @@ README.md
 Underneath-Forge_Client.launch
 Underneath-Forge_Server.launch
 bin
->>>>>>> 45a6061b655a941784df6c089fd987f5e335295d
