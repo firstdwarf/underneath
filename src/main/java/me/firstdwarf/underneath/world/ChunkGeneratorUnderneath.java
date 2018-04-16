@@ -1,17 +1,16 @@
-package me.firstdwarf.underneath.terrain;
+package me.firstdwarf.underneath.world;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.IChunkGenerator;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -53,13 +52,13 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
 
     @Override
     public List<Biome.SpawnListEntry> getPossibleCreatures(EnumCreatureType creatureType, BlockPos pos) {
-        return null;
+        return new ArrayList<Biome.SpawnListEntry>();
     }
 
     @Nullable
     @Override
     public BlockPos getNearestStructurePos(World worldIn, String structureName, BlockPos position, boolean findUnexplored) {
-        return null;
+        return new BlockPos(0, 0, 0);
     }
 
     @Override

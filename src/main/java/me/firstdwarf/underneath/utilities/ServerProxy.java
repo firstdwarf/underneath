@@ -1,5 +1,15 @@
 package me.firstdwarf.underneath.utilities;
 
-public class ServerProxy extends CommonProxy	{
-	
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+
+public class ServerProxy extends CommonProxy {
+
+    public ServerProxy() {
+
+    }
+
+    public void init(FMLInitializationEvent e) {
+
+    }
+
 }

@@ -1,4 +1,4 @@
-package me.firstdwarf.underneath.terrain;
+package me.firstdwarf.underneath.world;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -14,7 +14,12 @@ public class WorldProviderUnderneath extends WorldProvider {
 
     @Override
     public DimensionType getDimensionType() {
-        return DimensionType.byName("underneath");
+        return UnderneathDimensions.underneathDimensionType;
+    }
+
+    @Override
+    public String getSaveFolder() {
+        return "DIM-Underneath";
     }
 
     @Override
