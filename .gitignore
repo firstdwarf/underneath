@@ -33,7 +33,6 @@ gradle-app.setting
 .metadata
 .project
 .settings
-README.md
 Underneath-Forge_Client.launch
 Underneath-Forge_Server.launch
 bin
