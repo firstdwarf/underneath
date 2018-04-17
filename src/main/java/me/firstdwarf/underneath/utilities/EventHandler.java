@@ -38,6 +38,7 @@ public class EventHandler {
 		String toolMain = player.getHeldItemMainhand().getDisplayName();
 		String toolOff = player.getHeldItemOffhand().getDisplayName();
 		if(event.getState().getMaterial().equals((Material) CustomMaterial.NATURAL))	{
+			event.setCanceled(true);
 			System.out.println(toolMain + " " + toolOff);
 		}
 	}

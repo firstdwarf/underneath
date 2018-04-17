@@ -1,7 +1,7 @@
 package me.firstdwarf.underneath.world;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EnumCreatureType;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -10,6 +10,9 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.IChunkGenerator;
 
 import javax.annotation.Nullable;
+
+import me.firstdwarf.underneath.block.BlockMain;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -32,17 +35,31 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
 
     @Override
     public Chunk generateChunk(int x, int z) {
+    	IBlockState block;
         this.random.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
         ChunkPrimer chunkPrimer = new ChunkPrimer();
-
-        chunkPrimer.setBlockState(0, 0, 0, Blocks.STONE.getDefaultState());
-
+        
+        for (int i = 0; i <= 15; i++)	{
+        	for (int j = 0; j <= 15; j++)	{
+        		for (int k = 0; k <= 15; k++)	{
+        			if (Math.random() <= 0.5)	{
+        				block = BlockMain.exampleBlock.getDefaultState();
+        			}
+        			else	{
+        				block = BlockMain.oreCopper.getDefaultState();
+        			}
+        			
+        			chunkPrimer.setBlockState(i, j, k, block);
+        		}
+        	}
+        }
         return new Chunk(this.world, chunkPrimer, x, z);
     }
 
     @Override
     public void populate(int x, int z) {
-
+    	//check neighbors
+    	//decide if node
     }
 
     @Override
