@@ -1,6 +1,7 @@
 package me.firstdwarf.underneath.world;
 
 import net.minecraft.block.state.IBlockState;
+import me.firstdwarf.underneath.block.BlockMain;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -10,8 +11,6 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.IChunkGenerator;
 
 import javax.annotation.Nullable;
-
-import me.firstdwarf.underneath.block.BlockMain;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +52,9 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         		}
         	}
         }
+
+        chunkPrimer.setBlockState(0, 0, 0, BlockMain.exampleBlock.getDefaultState());
+
         return new Chunk(this.world, chunkPrimer, x, z);
     }
 
