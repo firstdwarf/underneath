@@ -1,7 +1,7 @@
 package me.firstdwarf.underneath.world;
 
+import me.firstdwarf.underneath.block.BlockMain;
 import net.minecraft.entity.EnumCreatureType;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -35,7 +35,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         this.random.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
         ChunkPrimer chunkPrimer = new ChunkPrimer();
 
-        chunkPrimer.setBlockState(0, 0, 0, Blocks.STONE.getDefaultState());
+        chunkPrimer.setBlockState(0, 0, 0, BlockMain.exampleBlock.getDefaultState());
 
         return new Chunk(this.world, chunkPrimer, x, z);
     }

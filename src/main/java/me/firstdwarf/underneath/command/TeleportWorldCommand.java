@@ -1,5 +1,6 @@
 package me.firstdwarf.underneath.command;
 
+import me.firstdwarf.underneath.world.CustomTeleporter;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -42,6 +43,6 @@ public class TeleportWorldCommand extends CommandBase {
         }
 
         WorldServer world = server.getWorld(dimensionId);
-        world.getMinecraftServer().getPlayerList().transferPlayerToDimension((EntityPlayerMP) sender, dimensionId, new Teleporter(world));
+        world.getMinecraftServer().getPlayerList().transferPlayerToDimension((EntityPlayerMP) sender, dimensionId, new CustomTeleporter(world, 0, 2, 0));
     }
 }

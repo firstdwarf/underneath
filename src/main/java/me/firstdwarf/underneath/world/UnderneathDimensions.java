@@ -20,7 +20,7 @@ public class UnderneathDimensions {
     }
 
     private static void registerDimensionTypes() {
-        underneathDimensionType = DimensionType.register(Underneath.MODID, "_underneath", DimensionManager.getNextFreeDimId(), WorldProviderUnderneath.class, false);
+        underneathDimensionType = DimensionType.register(Underneath.MODID, "_underneath", 7, WorldProviderUnderneath.class, false);
     }
 
     private static void registerDimensions() {
