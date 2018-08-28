@@ -7,6 +7,7 @@ import net.minecraft.world.gen.IChunkGenerator;
 
 public class WorldProviderUnderneath extends WorldProvider {
 
+	//TODO: Fix the damn RNG
     @Override
     public DimensionType getDimensionType() {
         return UnderneathDimensions.underneathDimensionType;
@@ -34,6 +35,7 @@ public class WorldProviderUnderneath extends WorldProvider {
 
     @Override
     public BlockPos getSpawnPoint() {
+    	//This motherfucking line of code has caused me hours of confusion about RNG repetition lol
         return new BlockPos(0, 0, 0); // Make sure we always spawn at X = 0, Y = 0, & Z = 0 for testing
     }
 

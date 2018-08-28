@@ -22,11 +22,11 @@ public class ClientProxy extends CommonProxy {
 
 	@SubscribeEvent
 	public static void registerModels(ModelRegistryEvent e)	{
-		for(NaturalBlock block : BlockMain.naturalBlockList)	{
+		for (NaturalBlock block : BlockMain.naturalBlockList)	{
 			ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, 
 					new ModelResourceLocation(block.getRegistryName(), "inventory"));
 		}
-		for(OreBlock block : BlockMain.oreBlockList)	{
+		for (OreBlock block : BlockMain.oreBlockList)	{
 			ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, 
 					new ModelResourceLocation(block.getRegistryName(), "inventory"));
 		}

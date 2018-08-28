@@ -4,6 +4,7 @@ import me.firstdwarf.underneath.block.BlockMain;
 import me.firstdwarf.underneath.block.OreBlock;
 import me.firstdwarf.underneath.utilities.EventHandler;
 import me.firstdwarf.underneath.world.UnderneathDimensions;
+import me.firstdwarf.underneath.world.node.NodeGen;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraftforge.common.MinecraftForge;
@@ -24,9 +25,10 @@ public class CommonProxy {
 
 	public void preInit(FMLPreInitializationEvent e) {
         UnderneathDimensions.init();
+        NodeGen.register();
 
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
-		for(OreBlock block : BlockMain.oreBlockList)	{
+		for (OreBlock block : BlockMain.oreBlockList)	{
 			OreDictionary.registerOre(block.getName(), block);
 		}
 	}

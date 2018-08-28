@@ -8,7 +8,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
 
 public class TeleportWorldCommand extends CommandBase {
@@ -43,6 +42,6 @@ public class TeleportWorldCommand extends CommandBase {
         }
 
         WorldServer world = server.getWorld(dimensionId);
-        world.getMinecraftServer().getPlayerList().transferPlayerToDimension((EntityPlayerMP) sender, dimensionId, new CustomTeleporter(world, 0, 2, 0));
+        world.getMinecraftServer().getPlayerList().transferPlayerToDimension((EntityPlayerMP) sender, dimensionId, new CustomTeleporter(world, 8, 21, 8));
     }
 }
