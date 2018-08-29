@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
+import me.firstdwarf.underneath.utilities.Coords;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public class NodeGen {
+	//TODO: Allow multi-chunk nodes
 	public static ArrayList<INodeProvider> nodeTypes = new ArrayList<>(0);
 	public static ConcurrentHashMap<String, Integer> chunkNodes = new ConcurrentHashMap<>();
 	public static void register()	{
@@ -15,10 +17,11 @@ public class NodeGen {
 		nodeTypes.add(spawn);
 	}
 	
-	public static void generateNodes(World world, Random random, ChunkPos chunkPos, INodeProvider node)	{
+	public static void generateNodes(World world, Random random, ChunkPos chunkPos, INodeProvider node,
+			Coords nodeOrigin, int nodeRotation)	{
 		if (node != null)	{
-			node.placeStructures(world, chunkPos);
-			node.generateCave(world, chunkPos);
+			node.placeStructures(world, chunkPos.getBlock(nodeOrigin.x, nodeOrigin.y, nodeOrigin.z), nodeRotation);
+			node.generateCave(world, chunkPos.getBlock(nodeOrigin.x, nodeOrigin.y, nodeOrigin.z), nodeRotation);
 		}
 	}
 	

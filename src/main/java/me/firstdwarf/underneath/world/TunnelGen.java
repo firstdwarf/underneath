@@ -18,7 +18,6 @@ public class TunnelGen {
 	
 	//TODO: Remove y-conversion method
 	//TODO: Use neighbor boolean array
-	//TODO: Hook up the non-entrance faces
 	//TODO: Add checks for relative coordinates of entrance when forcing faces
 	public static ConcurrentHashMap<String, byte[]> chunkTunnelEndpoints = new ConcurrentHashMap<>();
 	
@@ -31,7 +30,7 @@ public class TunnelGen {
 	}
 	
 	public static ChunkPrimer generateTunnelEndpoints(Random random, World world, ChunkPrimer chunkPrimer,
-			int x1, int z1, INodeProvider node)	{
+			int x1, int z1, INodeProvider node, Coords nodeOrigin, int nodeRotation)	{
 		/**
 		 * Byte array formatting for tunnel endpoint information. Each byte represents the following:
 		 * byte[i]	|	purpose				msb		6		5		4		3		2		1		lsb
@@ -91,34 +90,36 @@ public class TunnelGen {
 			}
 		}
 		
-		//Force tunnel endings on faces with entrances and clamp y-coords
+		//Force tunnel endings on faces with entrances, remove others, and clamp y-coords
 		if (node != null)	{
+			dataArray[0] &= 0x00;
 			boolean[] freeFaces = {true, true, true, true};
 			for (Entrance e : node.getEntrances())	{
-				dataArray[0] &= 0x0f;
-				System.out.println(dataArray[3] & 0xff);
+				e = e.rotate(nodeRotation);
+				Coords c = Coords.nodeCoordsToChunkCoords(e.coords, nodeOrigin, nodeRotation);
+				System.out.println(c.x + " " + c.y + " " + c.z);
 				//System.out.println("Chunk: (" + x1 + ", " + z1 + ")    Node Entrance Direction: " + e.facing.getName());
 				boolean flag = false;
 				int i;
 				switch (e.facing)	{
 				case NORTH:
 					dataArray[0] |= 0x08;
-					dataArray[1] = (byte) (e.y + random.nextInt(9) - 4);
+					dataArray[1] = (byte) (c.y + random.nextInt(9) - 4);
 					freeFaces[3] ^= true;
 					break;
 				case SOUTH:
 					dataArray[0] |= 0x04;
-					dataArray[2] = (byte) (e.y + random.nextInt(9) - 4);
+					dataArray[2] = (byte) (c.y + random.nextInt(9) - 4);
 					freeFaces[2] ^= true;
 					break;
 				case WEST:
 					dataArray[0] |= 0x02;
-					dataArray[3] = (byte) (e.y + random.nextInt(9) - 4);
+					dataArray[3] = (byte) (c.y + random.nextInt(9) - 4);
 					freeFaces[1] ^= true;
 					break;
 				case EAST:
 					dataArray[0] |= 0x01;
-					dataArray[4] = (byte) (e.y + random.nextInt(9) - 4);
+					dataArray[4] = (byte) (c.y + random.nextInt(9) - 4);
 					freeFaces[0] ^= true;
 					break;
 				case UP:
@@ -258,7 +259,7 @@ public class TunnelGen {
 	}
 	
 	public static ChunkPrimer generateTunnelLinks(Random random, World world, ChunkPrimer chunkPrimer,
-			int x, int z, INodeProvider node)	{
+			int x, int z, INodeProvider node, Coords nodeOrigin, int nodeRotation)	{
 		ChunkPos chunkPos = new ChunkPos(x, z);
 		byte[] loadedTags = chunkTunnelEndpoints.get(chunkPos.toString());
 		EnumFacing[] directionReference = {EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.EAST};
@@ -282,10 +283,12 @@ public class TunnelGen {
 		}
 		if (node != null)	{
 			for (Entrance e : node.getEntrances()) {
+				e = e.rotate(nodeRotation);
 				for (int k = 0; k < 4; k++)	{
 					if (directionReference[k] == e.facing)	{
 						if (faceTargets[k] != null)	{
-							chunkPrimer = connectEndpoints(random, chunkPrimer, e.coords, faceTargets[k]);
+							chunkPrimer = connectEndpoints(random, chunkPrimer,
+									Coords.nodeCoordsToChunkCoords(e.coords, nodeOrigin, nodeRotation), faceTargets[k]);
 							faceTargets[k] = null;
 						}
 					}
@@ -309,6 +312,7 @@ public class TunnelGen {
 		int selection = -1;
 		int totalWeight = 0;
 		int r;
+		float p = 0.5f;
 		int[] numberLine = new int[3];
 		while (Math.abs(xDelta) != 0 || Math.abs(yDelta) != 0 || Math.abs(zDelta) != 0)	{
 			totalWeight = 0;
@@ -322,7 +326,7 @@ public class TunnelGen {
 				numberLine[2] = totalWeight;
 				break;
 			case 0:
-				numberLine[0] = 2*Math.abs(xDelta);
+				numberLine[0] = (int) Math.ceil(p*Math.abs(xDelta));
 				totalWeight += numberLine[0];
 				totalWeight += Math.abs(yDelta);
 				numberLine[1] = totalWeight;
@@ -332,7 +336,7 @@ public class TunnelGen {
 			case 1:
 				numberLine[0] = Math.abs(xDelta);
 				totalWeight += numberLine[0];
-				totalWeight += 2*Math.abs(yDelta);
+				totalWeight += (int) Math.ceil(p*Math.abs(yDelta));
 				numberLine[1] = totalWeight;
 				totalWeight += Math.abs(zDelta);
 				numberLine[2] = totalWeight;
@@ -342,7 +346,7 @@ public class TunnelGen {
 				totalWeight += numberLine[0];
 				totalWeight += Math.abs(yDelta);
 				numberLine[1] = totalWeight;
-				totalWeight += 2*Math.abs(zDelta);
+				totalWeight += (int) Math.ceil(p*Math.abs(zDelta));
 				numberLine[2] = totalWeight;
 				break;
 			}
@@ -379,12 +383,12 @@ public class TunnelGen {
 				}
 				break;
 			}
+			System.out.println("Random: " + r + "    Line: [" + numberLine[0] + " " + numberLine[1] + " " + numberLine[2] + "]");
+			System.out.println("(" + xDelta + ", " + yDelta + ", " + zDelta + ")");
 			chunkPrimer.setBlockState(c1.x, c1.y, c1.z, Blocks.BEDROCK.getDefaultState());
 			xDelta = c1.x - c2.x;
 			yDelta = c1.y - c2.y;
 			zDelta = c1.z - c2.z;
-			System.out.println("Random: " + r + "    Line: [" + numberLine[0] + " " + numberLine[1] + " " + numberLine[2] + "]");
-			System.out.println("(" + xDelta + ", " + yDelta + ", " + zDelta + ")");
 		}
 		return chunkPrimer;
 	}

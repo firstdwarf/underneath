@@ -2,17 +2,20 @@ package me.firstdwarf.underneath.world.node;
 
 import java.util.ArrayList;
 
+import me.firstdwarf.underneath.utilities.Coords;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public class Spawn implements INodeProvider	{
 	//TODO: Make spawn appear in spawn chunk, not (0, 0)
-	//TODO: Move y-coord of entrance to node generation, or make it relative
+	//Consider node origin to be (0, 0, 0)- this will be the ideological center of the node
 	ArrayList<Entrance> entrances = new ArrayList<>();
-	Entrance e1 = new Entrance(EnumFacing.SOUTH, 8, 20, 14);
-	Entrance e2 = new Entrance(EnumFacing.NORTH, 8, 20, 2);
+	Entrance e1 = new Entrance(EnumFacing.SOUTH, 0, 0, 5);
+	Entrance e2 = new Entrance(EnumFacing.NORTH, 0, 0, -5);
 	
 	public Spawn()	{
 		entrances.add(e1);
@@ -20,16 +23,18 @@ public class Spawn implements INodeProvider	{
 	}
 
 	@Override
-	public void placeStructures(World world, ChunkPos chunkPos) {
-		world.setBlockState(chunkPos.getBlock(8, 20, 8), Blocks.GLOWSTONE.getDefaultState());
+	public void placeStructures(World world, BlockPos origin, int rotation) {
+		world.setBlockState(origin, Blocks.GLOWSTONE.getDefaultState());
 		for (Entrance e : entrances)	{
-			world.setBlockState(chunkPos.getBlock(e.x, e.y, e.z), Blocks.REDSTONE_BLOCK.getDefaultState());
+			IBlockState state;
+			state = e.facing == EnumFacing.NORTH ? Blocks.REDSTONE_BLOCK.getDefaultState() : Blocks.LAPIS_BLOCK.getDefaultState();
+			Coords.setBlockFromCoords(world, origin, e.coords, rotation, state);
 		}
 	}
 
 	@Override
-	public void generateCave(World world, ChunkPos chunkPos) {
-		// TODO Auto-generated method stub
+	public void generateCave(World world, BlockPos origin, int rotation) {
+		// TODO: Make some damn caves
 	}
 
 	@Override

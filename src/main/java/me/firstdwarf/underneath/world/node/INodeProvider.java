@@ -2,12 +2,14 @@ package me.firstdwarf.underneath.world.node;
 
 import java.util.ArrayList;
 
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public interface INodeProvider {
-	public void placeStructures(World world, ChunkPos chunkPos);
-	public void generateCave(World world, ChunkPos chunkPos);
+	//TODO: Add crossroads nodes
+	public void placeStructures(World world, BlockPos origin, int rotation);
+	public void generateCave(World world, BlockPos origin, int rotation);
 	public int getWeight(World world, ChunkPos chunkPos);
 	/**
 	 * Number of tunnels, entrance coordinates, entrance direction

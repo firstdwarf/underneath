@@ -11,6 +11,7 @@ import net.minecraft.world.gen.IChunkGenerator;
 
 import javax.annotation.Nullable;
 
+import me.firstdwarf.underneath.utilities.Coords;
 import me.firstdwarf.underneath.world.node.INodeProvider;
 import me.firstdwarf.underneath.world.node.NodeGen;
 
@@ -40,6 +41,8 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         this.random.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
         ChunkPrimer chunkPrimer = new ChunkPrimer();
         ChunkPos chunkPos = new ChunkPos(x, z);
+        int nodeRotation = 90*random.nextInt(4);
+        Coords nodeOrigin = new Coords(8, 20, 8);
         //System.out.println("Generating Chunk (" + x + ", " + z + ")");
         int nodeIndex = NodeGen.selectNodes(world, random, chunkPos);
         INodeProvider node;
@@ -50,8 +53,12 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         	node = null;
         }
         NodeGen.chunkNodes.put(chunkPos.toString(), nodeIndex);
-        chunkPrimer = TunnelGen.generateTunnelEndpoints(random, world, chunkPrimer, x, z, node);
-    	chunkPrimer = TunnelGen.generateTunnelLinks(random, world, chunkPrimer, x, z, node);
+        NodeGen.chunkNodes.put(chunkPos.toString() + ".rotation", nodeRotation);
+        NodeGen.chunkNodes.put(chunkPos.toString() + ".origin.x", nodeOrigin.x);
+        NodeGen.chunkNodes.put(chunkPos.toString() + ".origin.y", nodeOrigin.y);
+        NodeGen.chunkNodes.put(chunkPos.toString() + ".origin.z", nodeOrigin.z);
+        chunkPrimer = TunnelGen.generateTunnelEndpoints(random, world, chunkPrimer, x, z, node, nodeOrigin, nodeRotation);
+    	chunkPrimer = TunnelGen.generateTunnelLinks(random, world, chunkPrimer, x, z, node, nodeOrigin, nodeRotation);
         for (int i = 0; i <= 15; i++)	{
         	for (int j = 0; j <= 255; j++)	{
         		//chunkPrimer.setBlockState(i, j, 0, Blocks.GLOWSTONE.getDefaultState());
@@ -77,13 +84,17 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
     	}
     	ChunkPos chunkPos = new ChunkPos(x, z);
     	int nodeIndex = NodeGen.chunkNodes.get(chunkPos.toString());
+    	int nodeRotation = NodeGen.chunkNodes.get(chunkPos.toString() + ".rotation");
+    	Coords nodeOrigin = new Coords(NodeGen.chunkNodes.get(chunkPos.toString() + ".origin.x"),
+    			NodeGen.chunkNodes.get(chunkPos.toString() + ".origin.y"),
+    			NodeGen.chunkNodes.get(chunkPos.toString() + ".origin.z"));
     	if (nodeIndex != -1)	{
     		node = NodeGen.nodeTypes.get(nodeIndex);
     	}
     	else	{
     		node = null;
     	}
-    	NodeGen.generateNodes(world, random, chunkPos, node);
+    	NodeGen.generateNodes(world, random, chunkPos, node, nodeOrigin, nodeRotation);
     }
 
     @Override

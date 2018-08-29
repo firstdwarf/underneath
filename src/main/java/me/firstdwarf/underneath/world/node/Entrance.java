@@ -15,4 +15,21 @@ public class Entrance {
 		this.z = z;
 		this.coords = new Coords(x, y, z);
 	}
+	
+	public Entrance(EnumFacing facing, Coords coords)	{
+		this.facing = facing;
+		this.x = coords.x;
+		this.y = coords.y;
+		this.z = coords.z;
+		this.coords = coords;
+	}
+	
+	public Entrance rotate(int degree)	{
+		int count = degree/90;
+		Entrance eOut = new Entrance(this.facing, this.coords);
+		for (int i = 1; i <= count; i++)	{
+			eOut.facing = eOut.facing.rotateYCCW();
+		}
+		return eOut;
+	}
 }

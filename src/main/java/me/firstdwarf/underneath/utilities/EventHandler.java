@@ -54,10 +54,16 @@ public class EventHandler {
 		World world = event.getWorld();
 		NBTTagCompound nbt = event.getData();
 		ChunkPos pos = event.getChunk().getPos();
+		int[] origin = new int[3];
 		if (!world.isRemote)	{
 			if (world.provider.getDimensionType().equals(UnderneathDimensions.underneathDimensionType))	{
 				TunnelGen.chunkTunnelEndpoints.put(pos.toString(), nbt.getByteArray(pos.toString() + ".tunnels"));
 				NodeGen.chunkNodes.put(pos.toString(), nbt.getInteger(pos.toString() + ".node"));
+				NodeGen.chunkNodes.put(pos.toString() + ".rotation", nbt.getInteger(pos.toString() + ".rotation"));
+				origin = nbt.getIntArray(pos.toString() + ".origin");
+				NodeGen.chunkNodes.put(pos.toString() + ".origin.x", origin[0]);
+				NodeGen.chunkNodes.put(pos.toString() + ".origin.y", origin[1]);
+				NodeGen.chunkNodes.put(pos.toString() + ".origin.z", origin[2]);
 			}
 		}
 	}
@@ -68,11 +74,19 @@ public class EventHandler {
 		ChunkPos pos = event.getChunk().getPos();
 		if (!world.isRemote)	{
 			if (world.provider.getDimensionType().equals(UnderneathDimensions.underneathDimensionType))	{
+				int[] origin = {NodeGen.chunkNodes.get(pos.toString() + ".origin.x"),
+						NodeGen.chunkNodes.get(pos.toString() + ".origin.y"), NodeGen.chunkNodes.get(pos.toString() + ".origin.z")};
 				nbt.setByteArray(pos.toString() + ".tunnels", TunnelGen.chunkTunnelEndpoints.get(pos.toString()));
 				nbt.setInteger(pos.toString() + ".node", NodeGen.chunkNodes.get(pos.toString()));
+				nbt.setInteger(pos.toString() + ".rotation", NodeGen.chunkNodes.get(pos.toString() + ".rotation"));
+				nbt.setIntArray(pos.toString() + ".origin", origin);
 				if (!event.getChunk().isLoaded())	{
 					TunnelGen.chunkTunnelEndpoints.remove(pos.toString());
 					NodeGen.chunkNodes.remove(pos.toString());
+					NodeGen.chunkNodes.remove(pos.toString() + ".rotation");
+					NodeGen.chunkNodes.remove(pos.toString() + ".origin.x");
+					NodeGen.chunkNodes.remove(pos.toString() + ".origin.y");
+					NodeGen.chunkNodes.remove(pos.toString() + ".origin.z");
 				}
 			}
 		}
