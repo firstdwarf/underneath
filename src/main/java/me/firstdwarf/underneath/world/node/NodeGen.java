@@ -10,6 +10,7 @@ import net.minecraft.world.World;
 
 public class NodeGen {
 	//TODO: Allow multi-chunk nodes
+	//TODO: Allow forced node choices
 	public static ArrayList<INodeProvider> nodeTypes = new ArrayList<>(0);
 	public static ConcurrentHashMap<String, Integer> chunkNodes = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<String, ArrayList<Entrance>> chunkEntrances = new ConcurrentHashMap<>();
