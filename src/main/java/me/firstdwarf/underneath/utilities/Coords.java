@@ -1,10 +1,12 @@
 package me.firstdwarf.underneath.utilities;
 
+import java.util.ArrayList;
+
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-//TODO: Write a world coordinate retrieval method
+//TODO: Remove this
 public class Coords {
 	public int x;
 	public int y;
@@ -65,5 +67,16 @@ public class Coords {
 	}
 	public static Coords add(Coords c1, Coords c2)	{
 		return new Coords(c1.x + c2.x, c1.y + c2.y, c1.z + c2.z);
+	}
+	public static void recordStateCuboid(int xMin, int xMax, int yMin, int yMax, int zMin, int zMax,
+			IBlockState state, ArrayList<Coords> coords, ArrayList<IBlockState> states)	{
+		for (int x = xMin; x <= xMax; x++)	{
+			for (int y = yMin; y <= yMax; y++)	{
+				for (int z = zMin; z <= zMax; z++)	{
+					coords.add(new Coords(x, y, z));
+					states.add(state);
+				}
+			}
+		}
 	}
 }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-import me.firstdwarf.underneath.utilities.Coords;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
@@ -12,20 +12,21 @@ public class NodeGen {
 	//TODO: Allow multi-chunk nodes
 	public static ArrayList<INodeProvider> nodeTypes = new ArrayList<>(0);
 	public static ConcurrentHashMap<String, Integer> chunkNodes = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<String, ArrayList<Entrance>> chunkEntrances = new ConcurrentHashMap<>();
 	public static void register()	{
 		Spawn spawn = new Spawn();
 		nodeTypes.add(spawn);
 	}
 	
 	public static void generateNodes(World world, Random random, ChunkPos chunkPos, INodeProvider node,
-			Coords nodeOrigin, int nodeRotation)	{
+			BlockPos nodeOrigin, int nodeRotation)	{
 		if (node != null)	{
-			node.placeStructures(world, chunkPos.getBlock(nodeOrigin.x, nodeOrigin.y, nodeOrigin.z), nodeRotation);
-			node.generateCave(world, chunkPos.getBlock(nodeOrigin.x, nodeOrigin.y, nodeOrigin.z), nodeRotation);
+			node.placeStructures(world, chunkPos.getBlock(nodeOrigin.getX(), nodeOrigin.getY(), nodeOrigin.getZ()), nodeRotation);
+			node.generateCave(world, chunkPos.getBlock(nodeOrigin.getX(), nodeOrigin.getY(), nodeOrigin.getZ()), nodeRotation);
 		}
 	}
 	
-	public static int selectNodes(World world, Random random, ChunkPos chunkPos)	{
+	public static int selectNodes(World world, Random random, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation)	{
 		int blankWeight = 10;
 		int totalWeight = blankWeight;
 		int nodeWeight = 0;
@@ -36,7 +37,7 @@ public class NodeGen {
 		numberLine[0] = blankWeight;
 		
 		for (INodeProvider node : nodeTypes)	{
-			nodeWeight = node.getWeight(world, chunkPos);
+			nodeWeight = node.getWeight(world, chunkPos, nodeOrigin, nodeRotation);
 			if (nodeWeight == -1)	{
 				choiceIndex = i - 1;
 				break;
