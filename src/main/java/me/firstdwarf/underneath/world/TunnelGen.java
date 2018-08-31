@@ -129,29 +129,44 @@ public class TunnelGen {
 			}
 			//Force another face
 			if (tunnelCount == 1)	{
-				System.out.println("yAverage is " + yAverage);
-				int r = random.nextInt(availableFaces.size());
-				EnumFacing chosenFace = availableFaces.get(r);
-				switch (chosenFace)	{
-				case NORTH:
-					dataArray[0] |= 0x08;
-					dataArray[1] = (byte) (yAverage + random.nextInt(5) - 2);
-					break;
-				case SOUTH:
-					dataArray[0] |= 0x04;
-					dataArray[2] = (byte) (yAverage + random.nextInt(5) - 2);
-					break;
-				case WEST:
-					dataArray[0] |= 0x02;
-					dataArray[3] = (byte) (yAverage + random.nextInt(5) - 2);
-					break;
-				case EAST:
-					dataArray[0] |= 0x01;
-					dataArray[4] = (byte) (yAverage + random.nextInt(5) - 2);
-					break;
-				default:
-					break;
+				while (!availableFaces.isEmpty())	{
+					int max = availableFaces.size();
+					int r = random.nextInt(max);
+					EnumFacing chosenFace = availableFaces.get(r);
+					availableFaces.remove(r);
+					switch (chosenFace)	{
+					case NORTH:
+						dataArray[0] |= 0x08;
+						dataArray[1] = (byte) (yAverage + random.nextInt(5) - 2);
+						break;
+					case SOUTH:
+						dataArray[0] |= 0x04;
+						dataArray[2] = (byte) (yAverage + random.nextInt(5) - 2);
+						break;
+					case WEST:
+						dataArray[0] |= 0x02;
+						dataArray[3] = (byte) (yAverage + random.nextInt(5) - 2);
+						break;
+					case EAST:
+						dataArray[0] |= 0x01;
+						dataArray[4] = (byte) (yAverage + random.nextInt(5) - 2);
+						break;
+					default:
+						break;
+					}
+					//Tweak chances to spawn additional tunnels
+					//TODO: Think about the effect of loops
+					//Number of times to run through the loop
+					int t = 1;
+					//Odds of not removing a face is (1/p)
+					int p = 4;
+					for (int i = 0; i < t; i++)	{
+						if (random.nextInt(p) != 0 && !availableFaces.isEmpty())	{
+							availableFaces.remove(0);
+						}
+					}
 				}
+				//System.out.println("Generation flag after force: " + dataArray[0]);
 			}
 		}
 		
@@ -279,6 +294,7 @@ public class TunnelGen {
 			dataArray[5] = loadedTags[6];
 			dataArray[1] = loadedTags[2];
 			if(!((loadedTags[0] & 0x04) == 0))	{
+				dataArray[0] |= 0x08;
 				x = loadedTags[6] & 0x0f;
 				y = convertY(loadedTags[2]);
 				z = 0;
@@ -305,6 +321,7 @@ public class TunnelGen {
 			dataArray[6] = loadedTags[5];
 			dataArray[2] = loadedTags[1];
 			if(!((loadedTags[0] & 0x08) == 0))	{
+				dataArray[0] |= 0x04;
 				x = loadedTags[5] & 0x0f;
 				y = convertY(loadedTags[1]);
 				z = 15;
@@ -335,6 +352,7 @@ public class TunnelGen {
 			dataArray[7] = loadedTags[8];
 			dataArray[3] = loadedTags[4];
 			if(!((loadedTags[0] & 0x01) == 0))	{
+				dataArray[0] |= 0x02;
 				x = 0;
 				y = convertY(loadedTags[4]);
 				z = loadedTags[8] & 0x0f;
@@ -361,6 +379,7 @@ public class TunnelGen {
 			dataArray[8] = loadedTags[7];
 			dataArray[4] = loadedTags[3];
 			if(!((loadedTags[0] & 0x02) == 0))	{
+				dataArray[0] |= 0x01;
 				x = 15;
 				y = convertY(loadedTags[3]);
 				z = loadedTags[7] & 0x0f;
@@ -383,16 +402,16 @@ public class TunnelGen {
 		byte[] loadedTags = chunkTunnelEndpoints.get(chunkPos.toString());
 		EnumFacing[] directionReference = {EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.EAST};
 		BlockPos[] faceTargets = {null, null, null, null};
-		if (!((loadedTags[0] & 0x08) == 0))	{
+		if ((loadedTags[0] & 0x08) != 0)	{
 			faceTargets[0] = new BlockPos(loadedTags[5] & 0x0f, (int) loadedTags[1] & 0xff, 0);
 		}
-		if (!((loadedTags[0] & 0x04) == 0))	{
+		if ((loadedTags[0] & 0x04) != 0)	{
 			faceTargets[1] = new BlockPos(loadedTags[6] & 0x0f, (int) loadedTags[2] & 0xff, 15);
 		}
-		if (!((loadedTags[0] & 0x02) == 0))	{
+		if ((loadedTags[0] & 0x02) != 0)	{
 			faceTargets[2] = new BlockPos(0, (int) loadedTags[3] & 0xff, loadedTags[7] & 0x0f);
 		}
-		if (!((loadedTags[0] & 0x01) == 0))	{
+		if ((loadedTags[0] & 0x01) != 0)	{
 			faceTargets[3] = new BlockPos(15, (int) loadedTags[4] & 0xff, loadedTags[8] & 0x0f);
 		}
 		//TODO: Think about these later
@@ -405,7 +424,6 @@ public class TunnelGen {
 						if (directionReference[k] == e.facing)	{
 							if (faceTargets[k] != null)	{
 								chunkPrimer = connectEndpoints(random, chunkPrimer, e.coords, faceTargets[k]);
-								faceTargets[k] = null;
 							}
 						}
 					}
@@ -423,7 +441,6 @@ public class TunnelGen {
 							if (faceTargets[k] != null)	{
 								System.out.println("Linking spillover chunk");
 								chunkPrimer = connectEndpoints(random, chunkPrimer, e.coords, faceTargets[k]);
-								faceTargets[k] = null;
 							}
 						}
 					}
@@ -441,11 +458,15 @@ public class TunnelGen {
 				}
 			}
 			if (totalFaces != 0)	{
+				//System.out.println("Total faces: " + totalFaces);
+				//System.out.println("Generation flags: " + loadedTags[0]);
 				averagePos = new BlockPos(averagePos.getX()/totalFaces, averagePos.getY()/totalFaces, averagePos.getZ()/totalFaces);
+				//System.out.println("Average position: " + averagePos.toString());
 			}
 			//System.out.println("Average position for some chunk or other: " + averagePos.toString());
 			for (BlockPos p : faceTargets)	{
 				if (p != null)	{
+					//System.out.println("Connecting targets: " + p.toString() + " and " + averagePos.toString());
 					chunkPrimer = connectEndpoints(random, chunkPrimer, p, averagePos);
 				}
 			}
