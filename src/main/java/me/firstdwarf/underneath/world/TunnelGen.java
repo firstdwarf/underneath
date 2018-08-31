@@ -128,7 +128,7 @@ public class TunnelGen {
 				yAverage /= tunnelCount;
 			}
 			//Force another face
-			if (tunnelCount == 1)	{
+			if (tunnelCount >= 1)	{
 				while (!availableFaces.isEmpty())	{
 					int max = availableFaces.size();
 					int r = random.nextInt(max);
@@ -156,6 +156,7 @@ public class TunnelGen {
 					}
 					//Tweak chances to spawn additional tunnels
 					//TODO: Think about the effect of loops
+					//TODO: Add conditions for higher tunnel counts- easy
 					//Number of times to run through the loop
 					int t = 1;
 					//Odds of not removing a face is (1/p)
