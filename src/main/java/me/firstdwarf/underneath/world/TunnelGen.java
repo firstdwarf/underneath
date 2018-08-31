@@ -155,10 +155,8 @@ public class TunnelGen {
 						break;
 					}
 					//Tweak chances to spawn additional tunnels
-					//TODO: Think about the effect of loops
-					//TODO: Add conditions for higher tunnel counts- easy
 					//Number of times to run through the loop
-					int t = 1;
+					int t = 2;
 					//Odds of not removing a face is (1/p)
 					int p = 4;
 					for (int i = 0; i < t; i++)	{

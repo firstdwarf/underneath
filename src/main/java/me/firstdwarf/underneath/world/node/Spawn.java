@@ -18,17 +18,21 @@ public class Spawn implements INodeProvider	{
 	ArrayList<Coords> coordinates = new ArrayList<>();
 	ArrayList<IBlockState> states = new ArrayList<>();
 	ArrayList<Entrance> entrances = new ArrayList<>();
-	int xMin = 0;
-	int xMax = 0;
+	int xMin = -5;
+	int xMax = 5;
 	int zMin = -20;
 	int zMax = 20;
 	//At least one entrance has to face north, up, or down (except a spawn node)
 	Entrance e1 = new Entrance(EnumFacing.SOUTH, 0, 0, 20);
 	Entrance e2 = new Entrance(EnumFacing.NORTH, 0, 0, -20);
+	Entrance e3 = new Entrance(EnumFacing.WEST, -5, 0, 0);
+	Entrance e4 = new Entrance(EnumFacing.EAST, 5, 0, 0);
 	
 	public Spawn()	{
 		entrances.add(e1);
 		entrances.add(e2);
+		entrances.add(e3);
+		entrances.add(e4);
 		Coords.recordStateCuboid(0, 0, 0, 0, -4, 4, Blocks.BRICK_BLOCK.getDefaultState(), coordinates, states);
 	}
 
