@@ -22,7 +22,6 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
 
     private World world;
     private Random random;
-    private boolean flag = true;
 
     /**
      * Constructor

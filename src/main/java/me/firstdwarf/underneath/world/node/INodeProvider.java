@@ -2,7 +2,6 @@ package me.firstdwarf.underneath.world.node;
 
 import java.util.ArrayList;
 
-import me.firstdwarf.underneath.utilities.Coords;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;

@@ -55,7 +55,7 @@ public class TunnelGen {
 		//Face order: north, south, west, east (same as y-coordinate storage order)
 		EnumFacing[] faceIndex = {EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.EAST};
 		boolean[] isNeighborLoaded = {world.isChunkGeneratedAt(x1, z1 - 1), world.isChunkGeneratedAt(x1, z1 + 1),
-			world.isChunkGeneratedAt(x1 - 1, z1), world.isChunkGeneratedAt(x1 + 1, z1),};
+			world.isChunkGeneratedAt(x1 - 1, z1), world.isChunkGeneratedAt(x1 + 1, z1)};
 		Chunk[] neighborChunks = {null, null, null, null};
 		byte[] yData = {0x00, 0x00, 0x00, 0x00};
 		if (isNeighborLoaded[0])	{
@@ -78,6 +78,7 @@ public class TunnelGen {
 		
 		//Load neighbor information
 		if (nodeIndex == -1)	{
+			System.out.println("Found a -1!!!");
 			ArrayList<EnumFacing> availableFaces = new ArrayList<>();
 			for (EnumFacing e : faceIndex)	{
 				availableFaces.add(e);
@@ -85,6 +86,7 @@ public class TunnelGen {
 			int yAverage = 0;
 			int tunnelCount = 0;
 			for (int i = 0; i < 4; i++)	{
+				System.out.println("Checking neighboring chunk " + i);
 				Chunk c = neighborChunks[i];
 				if (c != null)	{
 					loadedTags = chunkTunnelEndpoints.get(c.getPos().toString());
@@ -93,33 +95,38 @@ public class TunnelGen {
 						if ((loadedTags[0] & 0x04) != 0)	{
 							yData[i] = loadedTags[2];
 							availableFaces.remove(faceIndex[i]);
+							tunnelCount++;
 						}
 						break;
 					case 1:
 						if ((loadedTags[0] & 0x08) != 0)	{
 							yData[i] = loadedTags[1];
 							availableFaces.remove(faceIndex[i]);
+							tunnelCount++;
 						}
 						break;
 					case 2:
 						if ((loadedTags[0] & 0x01) != 0)	{
 							yData[i] = loadedTags[4];
 							availableFaces.remove(faceIndex[i]);
+							tunnelCount++;
 						}
 						break;
 					case 3:
 						if ((loadedTags[0] & 0x02) != 0)	{
 							yData[i] = loadedTags[3];
 							availableFaces.remove(faceIndex[i]);
+							tunnelCount++;
 						}
 						break;
 					}
 				}
 				yAverage += (yData[i] & 0xff);
-				tunnelCount++;
 			}
-			yAverage /= tunnelCount;
-			
+			System.out.println("Tunnel count is " + tunnelCount);
+			if (tunnelCount != 0)	{
+				yAverage /= tunnelCount;
+			}
 			//Force another face
 			if (tunnelCount == 1)	{
 				System.out.println("yAverage is " + yAverage);

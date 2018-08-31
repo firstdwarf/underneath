@@ -174,7 +174,7 @@ public class Spawn implements INodeProvider	{
 		}
 		//Store present entrances
 		for(Entrance e : entrances)	{
-			System.out.println("Preparing to flag entrance");
+			//System.out.println("Preparing to flag entrance");
 			e = e.rotateFacing(nodeRotation);
 			ArrayList<Entrance> chunkEntrances = new ArrayList<>();
 			BlockPos eWorldCoords = Functions.nodeCoordsToWorldCoords(e.coords, chunkPos, nodeOrigin, nodeRotation);
@@ -186,7 +186,7 @@ public class Spawn implements INodeProvider	{
 				NodeGen.chunkEntrances.put(eChunk.toString(), chunkEntrances);
 			}
 			else	{
-				System.out.println("Stored an entrance for " + eChunk.toString());
+				//System.out.println("Stored an entrance for " + eChunk.toString());
 				chunkEntrances.add(e);
 				NodeGen.chunkEntrances.put(eChunk.toString(), chunkEntrances);
 			}
