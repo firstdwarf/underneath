@@ -2,6 +2,7 @@ package me.firstdwarf.underneath.core;
 
 import me.firstdwarf.underneath.block.BlockMain;
 import me.firstdwarf.underneath.block.OreBlock;
+import me.firstdwarf.underneath.lighting.DynamicLightingHandler;
 import me.firstdwarf.underneath.utilities.EventHandler;
 import me.firstdwarf.underneath.world.UnderneathDimensions;
 import me.firstdwarf.underneath.world.node.NodeGen;
@@ -28,6 +29,7 @@ public class CommonProxy {
         NodeGen.register();
 
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
+        MinecraftForge.EVENT_BUS.register(DynamicLightingHandler.class);
 		for (OreBlock block : BlockMain.oreBlockList)	{
 			OreDictionary.registerOre(block.getName(), block);
 		}
