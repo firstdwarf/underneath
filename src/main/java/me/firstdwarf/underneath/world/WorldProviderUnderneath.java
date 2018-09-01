@@ -32,11 +32,4 @@ public class WorldProviderUnderneath extends WorldProvider {
     public BlockPos getRandomizedSpawnPoint() {
         return this.getSpawnPoint();
     }
-
-    @Override
-    public BlockPos getSpawnPoint() {
-    	//This motherfucking line of code has caused me hours of confusion about RNG repetition lol
-        return new BlockPos(0, 0, 0); // Make sure we always spawn at X = 0, Y = 0, & Z = 0 for testing
-    }
-
 }

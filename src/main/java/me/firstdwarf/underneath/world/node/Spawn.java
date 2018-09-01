@@ -12,7 +12,6 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public class Spawn implements INodeProvider	{
-	//TODO: Make spawn appear in spawn chunk, not (0, 0)
 	//TODO: Entrance mapping only works on game restart- as in, deleting without a restart prevents mapping. Check call location?
 	//Consider node origin to be (0, 0, 0)- put this near where you want the main entrance)
 	ArrayList<Coords> coordinates = new ArrayList<>();
@@ -57,8 +56,10 @@ public class Spawn implements INodeProvider	{
 	//TODO: Implement checks on available nodes
 	@Override
 	public int getWeight(World world, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation) {
+		BlockPos spawnBlock = world.getSpawnPoint();
+		ChunkPos spawnChunk = new ChunkPos(spawnBlock.getX() >> 4, spawnBlock.getZ() >> 4);
 		int weight = 0;
-		if (chunkPos.x == 0 && chunkPos.z == 0)	{
+		if (chunkPos.x == spawnChunk.x && chunkPos.z == spawnChunk.z)	{
 			weight = -1;
 		}
 		return weight;

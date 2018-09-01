@@ -11,6 +11,7 @@ import net.minecraft.world.gen.IChunkGenerator;
 
 import javax.annotation.Nullable;
 
+import me.firstdwarf.underneath.utilities.Functions;
 import me.firstdwarf.underneath.world.node.INodeProvider;
 import me.firstdwarf.underneath.world.node.NodeGen;
 
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Random;
 
 public class ChunkGeneratorUnderneath implements IChunkGenerator {
-
+ 
     private World world;
     private Random random;
 
@@ -43,6 +44,11 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         int nodeRotation = 90*random.nextInt(4);
         BlockPos nodeOrigin = new BlockPos(random.nextInt(12) + 2, random.nextInt(128) + 63, random.nextInt(12) + 2);
         
+        ChunkPos spawnPos = new ChunkPos(world.getSpawnPoint().getX() >> 4, world.getSpawnPoint().getZ() >> 4);
+        if (spawnPos.x == chunkPos.x && spawnPos.z == chunkPos.z)	{
+        	nodeOrigin = Functions.worldCoordsToChunkCoords(world.getSpawnPoint());
+        	nodeOrigin = Functions.addCoords(nodeOrigin, new BlockPos(0, -1, 0));
+        }
         if (world.isChunkGeneratedAt(x, z - 1))	{
         	nodeRotation = 0;
         	world.getChunkFromChunkCoords(x, z - 1);
