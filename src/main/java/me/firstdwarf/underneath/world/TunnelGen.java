@@ -1,6 +1,7 @@
 package me.firstdwarf.underneath.world;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -284,7 +285,7 @@ public class TunnelGen {
 				y = convertY(dataArray[1]);
 				z = 0;
 				//System.out.println(x + " " + y + " " + z);
-				chunkPrimer.setBlockState(x, y, z, Blocks.FLOWING_WATER.getDefaultState());
+				//chunkPrimer.setBlockState(x, y, z, Blocks.FLOWING_WATER.getDefaultState());
 			}
 		}
 		else	{
@@ -298,7 +299,7 @@ public class TunnelGen {
 				y = convertY(loadedTags[2]);
 				z = 0;
 				//System.out.println(x + " " + y + " " + z);
-				chunkPrimer.setBlockState(x, y, z, BlockMain.oreCopper.getDefaultState());
+				//chunkPrimer.setBlockState(x, y, z, BlockMain.oreCopper.getDefaultState());
 			}
 			else	{
 				dataArray[0] &= 0xf7;
@@ -311,7 +312,7 @@ public class TunnelGen {
 				y = convertY(dataArray[2]);
 				z = 15;
 				//System.out.println(x + " " + y + " " + z);
-				chunkPrimer.setBlockState(x, y, z, Blocks.FLOWING_WATER.getDefaultState());
+				//chunkPrimer.setBlockState(x, y, z, Blocks.FLOWING_WATER.getDefaultState());
 			}
 		}
 		else	{
@@ -325,7 +326,7 @@ public class TunnelGen {
 				y = convertY(loadedTags[1]);
 				z = 15;
 				//System.out.println(x + " " + y + " " + z);
-				chunkPrimer.setBlockState(x, y, z, BlockMain.oreCopper.getDefaultState());
+				//chunkPrimer.setBlockState(x, y, z, BlockMain.oreCopper.getDefaultState());
 			}
 			else	{
 				dataArray[0] &= 0xfb;
@@ -334,15 +335,10 @@ public class TunnelGen {
 		//zy plane (0)-- west
 		if(!world.isChunkGeneratedAt(x1 - 1, z1))	{
 			if(!((dataArray[0] & 0x02) == 0))	{
-				if (x1 == 0 && z1 == 0)	{
-				}
 				x = 0;
 				y = convertY(dataArray[3]);
 				z = dataArray[7] & 0x0f;
-				if (x1 == 0 && z1 == 0)	{
-					//System.out.println(x + " " + y + " " + z);
-				}
-				chunkPrimer.setBlockState(x, y, z, Blocks.FLOWING_WATER.getDefaultState());
+				//chunkPrimer.setBlockState(x, y, z, Blocks.FLOWING_WATER.getDefaultState());
 			}
 		}
 		else	{
@@ -356,7 +352,7 @@ public class TunnelGen {
 				y = convertY(loadedTags[4]);
 				z = loadedTags[8] & 0x0f;
 				//System.out.println(x + " " + y + " " + z);
-				chunkPrimer.setBlockState(x, y, z, BlockMain.oreCopper.getDefaultState());
+				//chunkPrimer.setBlockState(x, y, z, BlockMain.oreCopper.getDefaultState());
 			}
 			else	{
 				dataArray[0] &= 0xfd;
@@ -369,7 +365,7 @@ public class TunnelGen {
 				y = convertY(dataArray[4]);
 				z = dataArray[8] & 0x0f;
 				//System.out.println(x + " " + y + " " + z);
-				chunkPrimer.setBlockState(x, y, z, Blocks.FLOWING_WATER.getDefaultState());
+				//chunkPrimer.setBlockState(x, y, z, Blocks.FLOWING_WATER.getDefaultState());
 			}
 		}
 		else	{
@@ -383,7 +379,7 @@ public class TunnelGen {
 				y = convertY(loadedTags[3]);
 				z = loadedTags[7] & 0x0f;
 				//System.out.println(x + " " + y + " " + z);
-				chunkPrimer.setBlockState(x, y, z, BlockMain.oreCopper.getDefaultState());
+				//chunkPrimer.setBlockState(x, y, z, BlockMain.oreCopper.getDefaultState());
 			}
 			else	{
 				dataArray[0] &= 0xfe;
@@ -474,6 +470,7 @@ public class TunnelGen {
 	}
 	
 	public static ChunkPrimer connectEndpoints(Random random, ChunkPrimer chunkPrimer, BlockPos p1, BlockPos p2)	{
+		HashMap<BlockPos, Boolean> airMap = new HashMap<>();
 		//System.out.println("Beginning connection");
 		//System.out.println("(" + p1.getX() + ", " + p1.getY() + ", " + p1.getZ() + ")");
 		//System.out.println(p1.getX() + "    " + p2.getX());
@@ -487,6 +484,8 @@ public class TunnelGen {
 		//Adjust this to change the likelihood of repeating a direction
 		float p = 0.5f;
 		int[] numberLine = new int[3];
+		airMap.put(p1, false);
+		chunkPrimer.setBlockState(p1.getX(), p1.getY(), p1.getZ(), Blocks.LAPIS_BLOCK.getDefaultState());
 		while (Math.abs(xDelta) != 0 || Math.abs(yDelta) != 0 || Math.abs(zDelta) != 0)	{
 			totalWeight = 0;
 			switch (selection)	{
@@ -560,10 +559,22 @@ public class TunnelGen {
 			//System.out.println("(" + xDelta + ", " + yDelta + ", " + zDelta + ")");
 			//System.out.println("(" + p1.getX() + ", " + p1.getY() + ", " + p1.getZ() + ")");
 			//System.out.println("Next!");
-			chunkPrimer.setBlockState(p1.getX(), p1.getY(), p1.getZ(), Blocks.BEDROCK.getDefaultState());
+			airMap.put(p1, false);
+			chunkPrimer.setBlockState(p1.getX(), p1.getY(), p1.getZ(), Blocks.LAPIS_BLOCK.getDefaultState());
 			xDelta = p1.getX() - p2.getX();
 			yDelta = p1.getY() - p2.getY();
 			zDelta = p1.getZ() - p2.getZ();
+		}
+		airMap = Functions.generateTunnelCell(random, airMap);
+		for (BlockPos pos : airMap.keySet())	{
+			if (pos.getX() >= 0 && pos.getX() < 16 && pos.getY() >= 0 && pos.getY() < 256 && pos.getZ() >= 0 && pos.getZ() < 16)	{
+				if (airMap.get(pos))	{
+					chunkPrimer.setBlockState(pos.getX(), pos.getY(), pos.getZ(), Blocks.AIR.getDefaultState());
+				}
+				else	{
+					//chunkPrimer.setBlockState(pos.getX(), pos.getY(), pos.getZ(), Blocks.ICE.getDefaultState());
+				}
+			}
 		}
 		return chunkPrimer;
 	}

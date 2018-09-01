@@ -1,6 +1,7 @@
 package me.firstdwarf.underneath.world;
 
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
@@ -40,6 +41,14 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         this.random.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
         ChunkPrimer chunkPrimer = new ChunkPrimer();
         ChunkPos chunkPos = new ChunkPos(x, z);
+        
+        for (int i = 0; i <= 15; i++)	{
+        	for (int j = 0; j <= 255; j++)	{
+        		for (int k = 0; k <= 15; k++)	{
+        			chunkPrimer.setBlockState(i, j, k, Blocks.STONE.getDefaultState());
+        		}
+        	}
+        }
         
         int nodeRotation = 90*random.nextInt(4);
         BlockPos nodeOrigin = new BlockPos(random.nextInt(12) + 2, random.nextInt(128) + 63, random.nextInt(12) + 2);
@@ -98,6 +107,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         
         if (node != null)	{
         	node.flagNeighbors(chunkPos, nodeOrigin, nodeRotation);
+        	//System.out.println("Flagging the neighbors of a chunk. Watch for this w/o restart");
         }
         NodeGen.chunkNodes.put(chunkPos.toString(), nodeIndex);
         NodeGen.chunkNodes.put(chunkPos.toString() + ".rotation", nodeRotation);
@@ -107,18 +117,6 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         chunkPrimer = TunnelGen.generateTunnelEndpoints(random, world, chunkPrimer, x, z, node, nodeOrigin, nodeRotation, nodeIndex);
     	chunkPrimer = TunnelGen.generateTunnelLinks(random, world, chunkPrimer, x, z, node, nodeOrigin, nodeRotation, nodeIndex);
     	
-        for (int i = 0; i <= 15; i++)	{
-        	for (int j = 0; j <= 255; j++)	{
-        		//chunkPrimer.setBlockState(i, j, 0, Blocks.GLOWSTONE.getDefaultState());
-        		//chunkPrimer.setBlockState(i, j, 15, Blocks.GLOWSTONE.getDefaultState());
-        	}
-        }
-        for (int k = 0; k <= 15; k++)	{
-        	for (int j = 0; j <= 255; j++)	{
-        		//chunkPrimer.setBlockState(0, j, k, Blocks.GLOWSTONE.getDefaultState());
-        		//chunkPrimer.setBlockState(15, j, k, Blocks.GLOWSTONE.getDefaultState());
-        	}
-        }
         Chunk chunk = new Chunk(this.world, chunkPrimer, x, z);
         return chunk;
     }

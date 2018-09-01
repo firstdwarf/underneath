@@ -9,7 +9,6 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public class NodeGen {
-	//TODO: Allow multi-chunk nodes
 	//TODO: Allow forced node choices
 	public static ArrayList<INodeProvider> nodeTypes = new ArrayList<>(0);
 	public static ConcurrentHashMap<String, Integer> chunkNodes = new ConcurrentHashMap<>();
@@ -22,8 +21,8 @@ public class NodeGen {
 	public static void generateNodes(World world, Random random, ChunkPos chunkPos, INodeProvider node,
 			BlockPos nodeOrigin, int nodeRotation)	{
 		if (node != null)	{
-			node.placeStructures(world, chunkPos.getBlock(nodeOrigin.getX(), nodeOrigin.getY(), nodeOrigin.getZ()), nodeRotation);
-			node.generateCave(world, chunkPos.getBlock(nodeOrigin.getX(), nodeOrigin.getY(), nodeOrigin.getZ()), nodeRotation);
+			node.generateCave(world, random, chunkPos, nodeOrigin, nodeRotation);
+			node.placeStructures(world, chunkPos, nodeOrigin, nodeRotation);
 		}
 	}
 	

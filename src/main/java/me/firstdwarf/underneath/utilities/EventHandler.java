@@ -17,6 +17,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed;
 import net.minecraftforge.event.world.ChunkDataEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class EventHandler {
@@ -88,6 +89,17 @@ public class EventHandler {
 					NodeGen.chunkNodes.remove(pos.toString() + ".origin.y");
 					NodeGen.chunkNodes.remove(pos.toString() + ".origin.z");
 				}
+			}
+		}
+	}
+	
+	@SubscribeEvent
+	public static void worldUnload(WorldEvent.Unload event)	{
+		World world = event.getWorld();
+		if (!world.isRemote)	{
+			if (world.provider.getDimensionType().equals(UnderneathDimensions.underneathDimensionType))	{
+				NodeGen.chunkNodes.clear();
+				TunnelGen.chunkTunnelEndpoints.clear();
 			}
 		}
 	}

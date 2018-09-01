@@ -13,7 +13,6 @@ import net.minecraft.world.WorldServer;
 
 public class TeleportWorldCommand extends CommandBase {
 
-	//TODO: Spawns player barely inside block in overworld?
     /**
      * This command is needed so that way we can get to the Underneath world
      */
