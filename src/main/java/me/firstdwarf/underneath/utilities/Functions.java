@@ -21,6 +21,16 @@ public class Functions {
 				airMap.put(new BlockPos(p.getX(), p.getY() + y, p.getZ()), true);
 			}
 		}
+		for (BlockPos p : clone.keySet())	{
+			for (int x = -1; x <= 1; x++)	{
+				for (int z = -1; z <= 1; z++)	{
+					if (airMap.get(new BlockPos(p.getX() + x, p.getY() + 1, p.getZ() + z)) != null
+							&& !airMap.get(new BlockPos(p.getX() + x, p.getY() + 1, p.getZ() + z)))	{
+						airMap.put(new BlockPos(p.getX(), p.getY() + 3, p.getZ()), true);
+					}
+				}
+			}
+		}
 		clone.clear();
 		clone.putAll(airMap);
 		for (BlockPos p : clone.keySet())	{

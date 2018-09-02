@@ -24,6 +24,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
  
     private World world;
     private Random random;
+    private boolean isFirstChunkGenerated;
 
     /**
      * Constructor
@@ -34,10 +35,12 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
     public ChunkGeneratorUnderneath(World world, long seed) {
         this.world = world;
         this.random = new Random(seed);
+        this.isFirstChunkGenerated = false;
     }
 
     @Override
     public Chunk generateChunk(int x, int z) {
+    	boolean isSpawn = false;
         this.random.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
         ChunkPrimer chunkPrimer = new ChunkPrimer();
         ChunkPos chunkPos = new ChunkPos(x, z);
@@ -54,9 +57,26 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         BlockPos nodeOrigin = new BlockPos(random.nextInt(12) + 2, random.nextInt(128) + 63, random.nextInt(12) + 2);
         
         ChunkPos spawnPos = new ChunkPos(world.getSpawnPoint().getX() >> 4, world.getSpawnPoint().getZ() >> 4);
-        if (spawnPos.x == chunkPos.x && spawnPos.z == chunkPos.z)	{
-        	nodeOrigin = Functions.worldCoordsToChunkCoords(world.getSpawnPoint());
-        	nodeOrigin = Functions.addCoords(nodeOrigin, new BlockPos(0, -1, 0));
+        
+        if (!isFirstChunkGenerated)	{
+        	isSpawn = true;
+        	isFirstChunkGenerated = true;
+        	if (spawnPos.x == chunkPos.x && spawnPos.z == chunkPos.z)	{
+        		nodeOrigin = Functions.worldCoordsToChunkCoords(world.getSpawnPoint());
+        		nodeOrigin = Functions.addCoords(nodeOrigin, new BlockPos(0, -1, 0));
+        	}
+        	else	{
+        		BlockPos pos = chunkPos.getBlock(nodeOrigin.getX(), nodeOrigin.getY(), nodeOrigin.getZ());
+        		world.setSpawnPoint(chunkPos.getBlock(nodeOrigin.getX(), nodeOrigin.getY(), nodeOrigin.getZ()));
+        		System.out.println("Spawn chunk set to " + new ChunkPos(pos.getX() >> 4, pos.getZ() >> 4).toString());
+        		nodeOrigin = Functions.worldCoordsToChunkCoords(world.getSpawnPoint());
+        		nodeOrigin = Functions.addCoords(nodeOrigin, new BlockPos(0, -1, 0));
+        		System.out.println("Spawn chunk is now " +
+        				new ChunkPos(world.getSpawnPoint().getX() >> 4, world.getSpawnPoint().getZ() >> 4).toString());
+        	}
+        }
+        else	{
+        	isSpawn = false;
         }
         if (world.isChunkGeneratedAt(x, z - 1))	{
         	nodeRotation = 0;
@@ -84,7 +104,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         }
         
         //System.out.println("Generating Chunk (" + x + ", " + z + ")");
-        int nodeIndex = NodeGen.selectNodes(world, random, chunkPos, nodeOrigin, nodeRotation);
+        int nodeIndex = NodeGen.selectNodes(world, random, chunkPos, nodeOrigin, nodeRotation, isSpawn);
         INodeProvider node;
         if (NodeGen.chunkNodes.containsKey(chunkPos.toString()))	{
         	//System.out.println("Found a pre-specified chunk");

@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import me.firstdwarf.underneath.utilities.Functions;
+import me.firstdwarf.underneath.world.UnderneathDimensions;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 
 public class Spawn implements INodeProvider	{
@@ -18,6 +20,8 @@ public class Spawn implements INodeProvider	{
 	ArrayList<IBlockState> states = new ArrayList<>();
 	ArrayList<Entrance> entrances = new ArrayList<>();
 	HashMap<BlockPos, IBlockState>	stateMap = new HashMap<>();
+	public static HashMap<DimensionType, BlockPos> spawns = new HashMap<>();
+	boolean flag = true;
 	int xMin = -5;
 	int xMax = 5;
 	int zMin = -5;
@@ -69,11 +73,14 @@ public class Spawn implements INodeProvider	{
 
 	//TODO: Implement checks on available nodes
 	@Override
-	public int getWeight(World world, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation) {
-		BlockPos spawnBlock = world.getSpawnPoint();
-		ChunkPos spawnChunk = new ChunkPos(spawnBlock.getX() >> 4, spawnBlock.getZ() >> 4);
+	public int getWeight(World world, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation, boolean isSpawn) {
 		int weight = 0;
-		if (chunkPos.x == spawnChunk.x && chunkPos.z == spawnChunk.z)	{
+		if (isSpawn)	{
+			if (world.provider.getDimensionType().equals(UnderneathDimensions.underneathDimensionType))	{
+				spawns.put(UnderneathDimensions.underneathDimensionType,
+						chunkPos.getBlock(nodeOrigin.getX(), nodeOrigin.getY(), nodeOrigin.getZ()));
+			}
+			System.out.println("Placing spawn node at " + chunkPos.toString() + "    " + nodeOrigin.toString());
 			weight = -1;
 		}
 		return weight;

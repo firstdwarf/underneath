@@ -26,7 +26,8 @@ public class NodeGen {
 		}
 	}
 	
-	public static int selectNodes(World world, Random random, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation)	{
+	public static int selectNodes(World world, Random random, ChunkPos chunkPos,
+			BlockPos nodeOrigin, int nodeRotation, boolean isSpawn)	{
 		int blankWeight = 10;
 		int totalWeight = blankWeight;
 		int nodeWeight = 0;
@@ -37,7 +38,7 @@ public class NodeGen {
 		numberLine[0] = blankWeight;
 		
 		for (INodeProvider node : nodeTypes)	{
-			nodeWeight = node.getWeight(world, chunkPos, nodeOrigin, nodeRotation);
+			nodeWeight = node.getWeight(world, chunkPos, nodeOrigin, nodeRotation, isSpawn);
 			if (nodeWeight == -1)	{
 				choiceIndex = i - 1;
 				break;

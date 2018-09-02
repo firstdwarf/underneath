@@ -15,7 +15,7 @@ public interface INodeProvider {
 	//TODO: Add crossroads nodes
 	//TODO: Potentially move other methods here
 	public void placeStructures(World world, ChunkPos chunkPos, BlockPos origin, int rotation);
-	public int getWeight(World world, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation);
+	public int getWeight(World world, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation, boolean isSpawn);
 	/**
 	 * Number of tunnels, entrance coordinates, entrance direction
 	 */
@@ -143,7 +143,7 @@ public interface INodeProvider {
 		if (!flaggedChunks.isEmpty())	{
 			for(ChunkPos c : flaggedChunks)	{
 				if (!NodeGen.chunkNodes.containsKey(c.toString()))	{
-					System.out.println("Flagged chunk: " + c.toString());
+					//System.out.println("Flagged chunk: " + c.toString());
 					NodeGen.chunkNodes.put(c.toString(), -2);
 				}
 			}
@@ -154,17 +154,17 @@ public interface INodeProvider {
 			e = e.rotateFacing(nodeRotation);
 			ArrayList<Entrance> chunkEntrances = new ArrayList<>();
 			BlockPos eWorldCoords = Functions.nodeCoordsToWorldCoords(e.coords, chunkPos, nodeOrigin, nodeRotation);
-			System.out.println("Entrance coordinates: " + eWorldCoords.toString());
+			//System.out.println("Entrance coordinates: " + eWorldCoords.toString());
 			ChunkPos eChunk = new ChunkPos(eWorldCoords.getX() >> 4, eWorldCoords.getZ() >> 4);
 			e = e.setCoords(Functions.worldCoordsToChunkCoords(eWorldCoords));
-			System.out.println("Running entrances for: " + eChunk.toString());
+			//System.out.println("Running entrances for: " + eChunk.toString());
 			if (NodeGen.chunkEntrances.containsKey(eChunk.toString()))	{
 				chunkEntrances = NodeGen.chunkEntrances.get(eChunk.toString());
 				chunkEntrances.add(e);
 				NodeGen.chunkEntrances.put(eChunk.toString(), chunkEntrances);
 			}
 			else	{
-				System.out.println("Stored an entrance for " + eChunk.toString());
+				//System.out.println("Stored an entrance for " + eChunk.toString());
 				chunkEntrances.add(e);
 				NodeGen.chunkEntrances.put(eChunk.toString(), chunkEntrances);
 			}

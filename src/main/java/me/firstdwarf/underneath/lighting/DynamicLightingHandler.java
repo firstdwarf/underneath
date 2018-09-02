@@ -6,17 +6,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import me.firstdwarf.underneath.world.CustomTeleporter;
+import me.firstdwarf.underneath.world.UnderneathDimensions;
+import me.firstdwarf.underneath.world.node.Spawn;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class DynamicLightingHandler {
@@ -32,6 +38,29 @@ public class DynamicLightingHandler {
 		if (entity instanceof EntityPlayer) {
 			// Get the item held in the entity's main hand
 			ItemStack item = entity.getHeldItem(EnumHand.MAIN_HAND);
+			
+			int x1 = MathHelper.floor(entity.posX);
+			int y1 = MathHelper.floor(entity.posY - entity.getYOffset());
+			int z1 = MathHelper.floor(entity.posZ);
+			World world = entity.getEntityWorld();
+			boolean inDanger = true;
+			for (int i = -1; i <= 1; i++)	{
+				for (int j = -1; j <= 2; j++)	{
+					for (int k = -1; k <= 1; k++)	{
+						if (world.getBlockState(new BlockPos(x1 + i, y1 + j, z1 + k)) == Blocks.AIR.getDefaultState())	{
+							inDanger = false;
+						}
+					}
+				}
+			}
+			MinecraftServer s = FMLCommonHandler.instance().getMinecraftServerInstance();
+			if (inDanger)	{
+				if (world.provider.getDimensionType().equals(UnderneathDimensions.underneathDimensionType))	{
+					BlockPos p = Spawn.spawns.get(UnderneathDimensions.underneathDimensionType);
+					s.getCommandManager().executeCommand(s,
+							"/tp " + entity.getName() + " " + p.getX() + " " + (p.getY() + 1) + " " + p.getZ());
+				}
+			}
 			
 			// If the item the entity is holding in their hand is a torch
 			if (item.getUnlocalizedName().equals("tile.torch")) {
