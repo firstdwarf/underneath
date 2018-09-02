@@ -20,7 +20,6 @@ public class Spawn implements INodeProvider	{
 	ArrayList<IBlockState> states = new ArrayList<>();
 	ArrayList<Entrance> entrances = new ArrayList<>();
 	HashMap<BlockPos, IBlockState>	stateMap = new HashMap<>();
-	public static HashMap<DimensionType, BlockPos> spawns = new HashMap<>();
 	boolean flag = true;
 	int xMin = -5;
 	int xMax = 5;
@@ -76,10 +75,6 @@ public class Spawn implements INodeProvider	{
 	public int getWeight(World world, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation, boolean isSpawn) {
 		int weight = 0;
 		if (isSpawn)	{
-			if (world.provider.getDimensionType().equals(UnderneathDimensions.underneathDimensionType))	{
-				spawns.put(UnderneathDimensions.underneathDimensionType,
-						chunkPos.getBlock(nodeOrigin.getX(), nodeOrigin.getY(), nodeOrigin.getZ()));
-			}
 			System.out.println("Placing spawn node at " + chunkPos.toString() + "    " + nodeOrigin.toString());
 			weight = -1;
 		}

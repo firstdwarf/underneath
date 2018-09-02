@@ -1,5 +1,6 @@
 package me.firstdwarf.underneath.command;
 
+import me.firstdwarf.underneath.world.ChunkGeneratorUnderneath;
 import me.firstdwarf.underneath.world.CustomTeleporter;
 import me.firstdwarf.underneath.world.UnderneathDimensions;
 import me.firstdwarf.underneath.world.node.Spawn;
@@ -47,7 +48,10 @@ public class TeleportWorldCommand extends CommandBase {
         WorldServer world = server.getWorld(dimensionId);
         BlockPos target = world.getSpawnPoint();
         if (world.provider.getDimensionType().equals(UnderneathDimensions.underneathDimensionType))	{
-        	target = Spawn.spawns.get(UnderneathDimensions.underneathDimensionType);
+        	target = ChunkGeneratorUnderneath.spawns.get(UnderneathDimensions.underneathDimensionType);
+        	if (target == null)	{
+        		target = world.getSpawnPoint();
+        	}
         	target = target.add(0, 1, 0);
         }
         world.getMinecraftServer().getPlayerList().transferPlayerToDimension((EntityPlayerMP) sender, dimensionId, new CustomTeleporter(world, target.getX(), target.getY(), target.getZ()));

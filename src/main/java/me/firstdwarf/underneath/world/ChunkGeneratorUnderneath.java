@@ -4,6 +4,7 @@ import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
@@ -15,8 +16,10 @@ import javax.annotation.Nullable;
 import me.firstdwarf.underneath.utilities.Functions;
 import me.firstdwarf.underneath.world.node.INodeProvider;
 import me.firstdwarf.underneath.world.node.NodeGen;
+import me.firstdwarf.underneath.world.node.Spawn;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -24,7 +27,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
  
     private World world;
     private Random random;
-    private boolean isFirstChunkGenerated;
+    public static HashMap<DimensionType, BlockPos> spawns = new HashMap<>();
 
     /**
      * Constructor
@@ -35,7 +38,6 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
     public ChunkGeneratorUnderneath(World world, long seed) {
         this.world = world;
         this.random = new Random(seed);
-        this.isFirstChunkGenerated = false;
     }
 
     @Override
@@ -58,9 +60,8 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         
         ChunkPos spawnPos = new ChunkPos(world.getSpawnPoint().getX() >> 4, world.getSpawnPoint().getZ() >> 4);
         
-        if (!isFirstChunkGenerated)	{
+        if (!spawns.containsKey(world.provider.getDimensionType()))	{
         	isSpawn = true;
-        	isFirstChunkGenerated = true;
         	if (spawnPos.x == chunkPos.x && spawnPos.z == chunkPos.z)	{
         		nodeOrigin = Functions.worldCoordsToChunkCoords(world.getSpawnPoint());
         		nodeOrigin = Functions.addCoords(nodeOrigin, new BlockPos(0, -1, 0));
@@ -74,6 +75,8 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         		System.out.println("Spawn chunk is now " +
         				new ChunkPos(world.getSpawnPoint().getX() >> 4, world.getSpawnPoint().getZ() >> 4).toString());
         	}
+        	spawns.put(world.provider.getDimensionType(),
+    				chunkPos.getBlock(nodeOrigin.getX(), nodeOrigin.getY(), nodeOrigin.getZ()));
         }
         else	{
         	isSpawn = false;
