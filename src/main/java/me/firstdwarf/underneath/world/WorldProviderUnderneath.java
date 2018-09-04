@@ -7,7 +7,6 @@ import net.minecraft.world.gen.IChunkGenerator;
 
 public class WorldProviderUnderneath extends WorldProvider {
 
-	//TODO: Fix the damn RNG
     @Override
     public DimensionType getDimensionType() {
         return UnderneathDimensions.underneathDimensionType;
@@ -24,10 +23,20 @@ public class WorldProviderUnderneath extends WorldProvider {
     }
 
     @Override
-    public boolean isSurfaceWorld() {
+    public boolean isSurfaceWorld()	{
         return false;
     }
 
+    @Override
+    public boolean canRespawnHere()	{
+    	return true;
+    }
+    
+    @Override
+    public boolean shouldClientCheckLighting()	{
+        return true;
+    }
+    
     @Override
     public BlockPos getRandomizedSpawnPoint() {
         return this.getSpawnPoint();

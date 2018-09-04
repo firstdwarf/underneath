@@ -1,6 +1,5 @@
 package me.firstdwarf.underneath.utilities;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -219,16 +218,5 @@ public class Functions {
 			break;
 		}
 		return cOut;
-	}
-	public static void recordStateCuboid(int xMin, int xMax, int yMin, int yMax, int zMin, int zMax,
-			IBlockState state, ArrayList<Coords> coords, ArrayList<IBlockState> states)	{
-		for (int x = xMin; x <= xMax; x++)	{
-			for (int y = yMin; y <= yMax; y++)	{
-				for (int z = zMin; z <= zMax; z++)	{
-					coords.add(new Coords(x, y, z));
-					states.add(state);
-				}
-			}
-		}
 	}
 }

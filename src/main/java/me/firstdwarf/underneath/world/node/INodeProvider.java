@@ -15,7 +15,7 @@ public interface INodeProvider {
 	//TODO: Add crossroads nodes
 	//TODO: Potentially move other methods here
 	public void placeStructures(World world, ChunkPos chunkPos, BlockPos origin, int rotation);
-	public int getWeight(World world, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation, boolean isSpawn);
+	public int getWeight(World world, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation);
 	/**
 	 * Number of tunnels, entrance coordinates, entrance direction
 	 */
@@ -25,14 +25,9 @@ public interface INodeProvider {
 	public HashMap<BlockPos, IBlockState> getStateMap();
 	
 	public default void generateCave(World world, Random random, ChunkPos chunkPos, BlockPos origin, int rotation)	{
-		System.out.println("Making the cave!");
 		IBlockState air = Blocks.AIR.getDefaultState();
-		IBlockState bedrock = Blocks.BEDROCK.getDefaultState();
-		IBlockState glass = Blocks.STAINED_GLASS.getDefaultState();
 		IBlockState stone = Blocks.STONE.getDefaultState();
 		HashMap<BlockPos, IBlockState> stateMap = this.getStateMap();
-		BlockPos min = this.getBounds()[0];
-		BlockPos max = this.getBounds()[1];
 		int range = 3;
 		HashMap<BlockPos, Boolean> airMap = Functions.generateCaveCell(random, stateMap, range);
 		for (BlockPos target : airMap.keySet())	{
@@ -40,9 +35,9 @@ public interface INodeProvider {
 					world.getBlockState(Functions.nodeCoordsToWorldCoords(target, chunkPos, origin, rotation)) != air)	{
 				Functions.setBlockFromNodeCoordinates(world, chunkPos, origin, target, rotation, air);
 			}
-			else if (world.getBlockState(Functions.nodeCoordsToWorldCoords(target, chunkPos, origin, rotation)) != air)	{
-				Functions.setBlockFromNodeCoordinates(world, chunkPos, origin, target, rotation, stone);
-			}
+//			else if (world.getBlockState(Functions.nodeCoordsToWorldCoords(target, chunkPos, origin, rotation)) != air)	{
+//				Functions.setBlockFromNodeCoordinates(world, chunkPos, origin, target, rotation, stone);
+//			}
 		}
 	}
 	

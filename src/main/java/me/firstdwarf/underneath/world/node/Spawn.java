@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import me.firstdwarf.underneath.utilities.Functions;
+import me.firstdwarf.underneath.world.ChunkGeneratorUnderneath;
+import me.firstdwarf.underneath.world.SaveData;
 import me.firstdwarf.underneath.world.UnderneathDimensions;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -14,13 +16,22 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 
 public class Spawn implements INodeProvider	{
+	
 	//TODO: Move entrance registration to allow restarting
+	
+	/*
+	 * This is currently the default node but expect all of these systems to change.
+	 * At the moment, BlockStates are added to a HashMap of block positions which is iterated through later.
+	 * Much of this should be moved to an abstract node to extend, if possible.
+	 * As more nodes are added, I'll improve these systems.
+	 * I probably have to put in one or two before the process is user friendly
+	 */
+	
 	//Consider node origin to be (0, 0, 0)- put this near where you want the main entrance)
 	ArrayList<BlockPos> coordinates = new ArrayList<>();
 	ArrayList<IBlockState> states = new ArrayList<>();
 	ArrayList<Entrance> entrances = new ArrayList<>();
 	HashMap<BlockPos, IBlockState>	stateMap = new HashMap<>();
-	boolean flag = true;
 	int xMin = -5;
 	int xMax = 5;
 	int zMin = -5;
@@ -72,11 +83,22 @@ public class Spawn implements INodeProvider	{
 
 	//TODO: Implement checks on available nodes
 	@Override
-	public int getWeight(World world, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation, boolean isSpawn) {
+	public int getWeight(World world, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation) {
 		int weight = 0;
-		if (isSpawn)	{
-			System.out.println("Placing spawn node at " + chunkPos.toString() + "    " + nodeOrigin.toString());
+		
+		//Load in spawn location for this world
+		SaveData data = SaveData.getData(world);
+		BlockPos spawn = data.spawn;
+		
+		//Check if the spawn hasn't been set yet
+		if (spawn == null)	{
+			
+			//Make this the spawn chunk and set the world spawn
 			weight = -1;
+			data.setSpawn(Functions.nodeCoordsToWorldCoords(new BlockPos(0, 1, 0), chunkPos, nodeOrigin, nodeRotation));
+			
+			//Mark data as changed for save operation
+			data.markDirty();
 		}
 		return weight;
 	}
