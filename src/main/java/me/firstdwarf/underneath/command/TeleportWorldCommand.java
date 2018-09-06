@@ -52,7 +52,7 @@ public class TeleportWorldCommand extends CommandBase {
         	SaveData data = SaveData.getData(w);
         	target = data.spawn;
         	if (target == null)	{
-        		target = w.getSpawnPoint();
+        		target = w.provider.getRandomizedSpawnPoint();
         	}
         }
         target = target.add(0, 1, 0);

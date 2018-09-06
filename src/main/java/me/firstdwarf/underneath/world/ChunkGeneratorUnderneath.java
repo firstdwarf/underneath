@@ -53,10 +53,17 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         
         //Set the entire chunkPrimer to stone. Eventually this should be more cleverly populated with raw materials
         for (int i = 0; i <= 15; i++)	{
-        	for (int j = 0; j <= 255; j++)	{
+        	for (int j = 1; j <= 254; j++)	{
         		for (int k = 0; k <= 15; k++)	{
         			chunkPrimer.setBlockState(i, j, k, Blocks.STONE.getDefaultState());
         		}
+        	}
+        }
+        
+        for (int i = 0; i <= 15; i++)	{
+        	for (int k = 0; k <= 15; k++)	{
+        		chunkPrimer.setBlockState(i, 0, k, Blocks.BEDROCK.getDefaultState());
+        		chunkPrimer.setBlockState(i, 255, k, Blocks.BEDROCK.getDefaultState());
         	}
         }
         
@@ -173,6 +180,8 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
     	
     	//Copies chunkPrimer into chunk object and returns it
         Chunk chunk = new Chunk(this.world, chunkPrimer, x, z);
+        //chunk.generateSkylightMap();
+        //chunk.resetRelightChecks();
         return chunk;
     }
 
@@ -207,6 +216,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
     	
     	//Generate the node in question, placing all blocks in the node, clearing out a cave, etc
     	NodeGen.generateNodes(world, random, chunkPos, node, nodeOrigin, nodeRotation);
+    	world.getChunkFromChunkCoords(x, z).resetRelightChecks();
     }
 
     //Our dimensions won't use vanilla structures

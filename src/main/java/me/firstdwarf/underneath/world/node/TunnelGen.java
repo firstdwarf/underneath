@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
+import me.firstdwarf.underneath.core.Config;
 import me.firstdwarf.underneath.utilities.Functions;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
@@ -198,10 +199,10 @@ public class TunnelGen {
 					 * int t represents the number of times to attempt to remove a face
 					 * int p represents the odds of the face staying in the pool (1/p)
 					 */
-					int t = 2;
-					int p = 4;
+					int t = Config.tunnelBranchRemovalCount;
+					int p = Config.tunnelBranchRemovalOdds;
 					for (int i = 0; i < t; i++)	{
-						if (random.nextInt(p) != 0 && !availableFaces.isEmpty())	{
+						if (random.nextInt(100) + 1 <= p && !availableFaces.isEmpty())	{
 							availableFaces.remove(0);
 						}
 					}
@@ -542,7 +543,7 @@ public class TunnelGen {
 		airMap.put(p1, false);
 		
 		//Currently sets the starting position of the path to lapis for testing purposes only. This line can simply be removed
-		chunkPrimer.setBlockState(p1.getX(), p1.getY(), p1.getZ(), Blocks.LAPIS_BLOCK.getDefaultState());
+		//chunkPrimer.setBlockState(p1.getX(), p1.getY(), p1.getZ(), Blocks.LAPIS_BLOCK.getDefaultState());
 		
 		//Continue the path generation algorithm, moving the starting point, until the starting point has reached the end
 		while (Math.abs(xDelta) != 0 || Math.abs(yDelta) != 0 || Math.abs(zDelta) != 0)	{
@@ -651,7 +652,7 @@ public class TunnelGen {
 			airMap.put(p1, false);
 			
 			//Currently sets the block at the algorithm's position to lapis. This line can simply be removed
-			chunkPrimer.setBlockState(p1.getX(), p1.getY(), p1.getZ(), Blocks.LAPIS_BLOCK.getDefaultState());
+			//chunkPrimer.setBlockState(p1.getX(), p1.getY(), p1.getZ(), Blocks.LAPIS_BLOCK.getDefaultState());
 			
 			//Find the difference between the algorithm's current position and the target position
 			xDelta = p1.getX() - p2.getX();

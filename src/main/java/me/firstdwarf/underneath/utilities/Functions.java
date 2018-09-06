@@ -3,16 +3,18 @@ package me.firstdwarf.underneath.utilities;
 import java.util.HashMap;
 import java.util.Random;
 
+import me.firstdwarf.underneath.core.Config;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public class Functions {
-	//TODO: Make sure step downs have free space
+	//TODO: Keep an eye out for step downs without free space
 	public static HashMap<BlockPos, Boolean> generateTunnelCell(Random random, HashMap<BlockPos, Boolean> airMap)	{
-		int blankPercentage = 0;
-		int maxIterations = 3;
+		int blankPercentage = Config.tunnelAirWeight;
+		int maxIterations = Config.tunnelCellStageCount;
+		int range = Config.tunnelRange;
 		HashMap<BlockPos, Boolean> clone = new HashMap<>();
 		clone.putAll(airMap);
 		for (BlockPos p : clone.keySet())	{
@@ -33,9 +35,9 @@ public class Functions {
 		clone.clear();
 		clone.putAll(airMap);
 		for (BlockPos p : clone.keySet())	{
-			for (int x = -2; x <= 2; x++)	{
+			for (int x = -1*range; x <= range; x++)	{
 				for (int y = 0; y <= 1; y++)	{
-					for (int z = -2; z <= 2; z++)	{
+					for (int z = -1*range; z <= range; z++)	{
 						boolean b = (random.nextInt(100) + 1) <= blankPercentage;
 						airMap.put(new BlockPos(p.getX() + x, p.getY() + y, p.getZ() + z), b);
 					}
@@ -58,7 +60,7 @@ public class Functions {
 						}
 					}
 				}
-				if (neighborAirCount >= 12)	{
+				if (neighborAirCount >= Config.tunnelCellAirRule)	{
 					airMap.put(p, true);
 				}
 				else	{
@@ -67,13 +69,13 @@ public class Functions {
 			}
 		}
 		for (BlockPos p : clone.keySet())	{
-			airMap.put(p, clone.get(p));
+			airMap.put(p, (clone.get(p) | airMap.get(p)));
 		}
 		return airMap;
 	}
 	public static HashMap<BlockPos, Boolean> generateCaveCell(Random random, HashMap<BlockPos, IBlockState> stateMap, int range)	{
-		int blankPercentage = 80;
-		int maxIterations = 5;
+		int blankPercentage = Config.caveAirWeight;
+		int maxIterations = Config.caveCellStageCount;
 		HashMap<BlockPos, Boolean> airMap = new HashMap<>();
 		for (BlockPos p : stateMap.keySet())	{
 			for (int x = -1*range; x <= range; x++)	{
@@ -101,7 +103,7 @@ public class Functions {
 						}
 					}
 				}
-				if (neighborAirCount >= 14)	{
+				if (neighborAirCount >= Config.caveCellAirRule)	{
 					airMap.put(p, true);
 				}
 				else	{
@@ -112,8 +114,8 @@ public class Functions {
 		return airMap;
 	}
 	public static HashMap<BlockPos, Boolean> generateCaveCell(Random random, BlockPos max, BlockPos min, int range)	{
-		int blankPercentage = 80;
-		int maxIterations = 5;
+		int blankPercentage = Config.caveAirWeight;
+		int maxIterations = Config.caveCellStageCount;
 		HashMap<BlockPos, Boolean> airMap = new HashMap<>();
 		for (int i = min.getX() - range; i <= max.getX() + range; i++)	{
 			for (int j = min.getY(); j <= max.getY() + range; j++)	{
@@ -145,7 +147,7 @@ public class Functions {
 								}
 							}
 						}
-						if (neighborAirCount >= 14)	{
+						if (neighborAirCount >= Config.caveCellAirRule)	{
 							airMap.put(new BlockPos(i, j, k), true);
 						}
 						else	{
@@ -176,23 +178,28 @@ public class Functions {
 	}
 	public static void setBlockFromNodeCoordinates(World world, ChunkPos chunkPos,
 			BlockPos origin, BlockPos coords, int rotation, IBlockState state)	{
+		setBlockFromNodeCoordinates(world, chunkPos, origin, coords, rotation, state, 3);
+	}
+	
+	public static void setBlockFromNodeCoordinates(World world, ChunkPos chunkPos,
+			BlockPos origin, BlockPos coords, int rotation, IBlockState state, int flag)	{
 		origin = chunkPos.getBlock(origin.getX(), origin.getY(), origin.getZ());
 		switch (rotation)	{
 		case 0:
 			world.setBlockState(new BlockPos(coords.getX() + origin.getX(), coords.getY() + origin.getY(),
-					coords.getZ() + origin.getZ()), state);
+					coords.getZ() + origin.getZ()), state, flag);
 			break;
 		case 90:
 			world.setBlockState(new BlockPos(coords.getZ() + origin.getX(), coords.getY() + origin.getY(),
-					-1*coords.getX() + origin.getZ()), state);
+					-1*coords.getX() + origin.getZ()), state, flag);
 			break;
 		case 180:
 			world.setBlockState(new BlockPos(-1*coords.getX() + origin.getX(), coords.getY() + origin.getY(),
-					-1*coords.getZ() + origin.getZ()), state);
+					-1*coords.getZ() + origin.getZ()), state, flag);
 			break;
 		case 270:
 			world.setBlockState(new BlockPos(-1*coords.getZ() + origin.getX(), coords.getY() + origin.getY(),
-					coords.getX() + origin.getZ()), state);
+					coords.getX() + origin.getZ()), state, flag);
 			break;
 		}
 	}

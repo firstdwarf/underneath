@@ -1,5 +1,7 @@
 package me.firstdwarf.underneath.core;
 
+import java.io.File;
+
 import me.firstdwarf.underneath.block.BlockMain;
 import me.firstdwarf.underneath.block.OreBlock;
 import me.firstdwarf.underneath.lighting.DynamicLightingHandler;
@@ -9,6 +11,7 @@ import me.firstdwarf.underneath.world.node.NodeGen;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -20,11 +23,18 @@ import net.minecraftforge.oredict.OreDictionary;
 @Mod.EventBusSubscriber
 public class CommonProxy {
 
+	public static Configuration config;
+	
 	public void init(FMLInitializationEvent e) {
 
 	}
 
 	public void preInit(FMLPreInitializationEvent e) {
+		
+		File f = e.getModConfigurationDirectory();
+		config = new Configuration(new File(f.getPath(), "underneath.cfg"));
+		Config.loadConfig();
+		
         UnderneathDimensions.init();
         NodeGen.register();
 
@@ -37,6 +47,9 @@ public class CommonProxy {
 
 	public void postInit(FMLPostInitializationEvent e) {
 
+		if (config.hasChanged())	{
+			config.save();
+		}
 	}
 
 	@SubscribeEvent

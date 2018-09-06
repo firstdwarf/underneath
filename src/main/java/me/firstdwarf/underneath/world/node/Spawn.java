@@ -9,10 +9,12 @@ import me.firstdwarf.underneath.world.SaveData;
 import me.firstdwarf.underneath.world.UnderneathDimensions;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
 public class Spawn implements INodeProvider	{
@@ -71,13 +73,18 @@ public class Spawn implements INodeProvider	{
 	
 	@Override
 	public void placeStructures(World world, ChunkPos chunkPos, BlockPos origin, int rotation) {
+		BlockPos pos = Functions.nodeCoordsToWorldCoords(new BlockPos(0, 0, 0), chunkPos, origin, rotation);
+		IBlockState torch = Blocks.TORCH.getDefaultState();
 		Functions.setBlockFromNodeCoordinates(world, chunkPos, origin,
-				new BlockPos(0, 0, 0), rotation, Blocks.GLOWSTONE.getDefaultState());
-		world.setBlockState(origin, Blocks.GLOWSTONE.getDefaultState());
+				new BlockPos(0, 0, 0), rotation, torch, 3);
+		world.getChunkFromChunkCoords(chunkPos.x, chunkPos.z).setLightFor(EnumSkyBlock.BLOCK, pos.add(0, 1, 0), torch.getLightValue(world, pos));
+		//world.updateBlockTick(pos, torch.getBlock(), 0, 0);
+		//world.markBlockRangeForRenderUpdate(pos.getX(), pos.getZ(), pos.getY(), 50, 50, 50);
 		for (Entrance e : entrances)	{
 			IBlockState state;
 			state = e.facing == EnumFacing.NORTH ? Blocks.REDSTONE_BLOCK.getDefaultState() : Blocks.LAPIS_BLOCK.getDefaultState();
-			Functions.setBlockFromNodeCoordinates(world, chunkPos, origin, e.coords, rotation, state);
+			//Functions.setBlockFromNodeCoordinates(world, chunkPos, origin, e.coords, rotation, state);
+			//Functions.setBlockFromNodeCoordinates(world, chunkPos, origin, e.coords.add(0, 1, 0), rotation, torch);
 		}
 	}
 
@@ -95,7 +102,7 @@ public class Spawn implements INodeProvider	{
 			
 			//Make this the spawn chunk and set the world spawn
 			weight = -1;
-			data.setSpawn(Functions.nodeCoordsToWorldCoords(new BlockPos(0, 1, 0), chunkPos, nodeOrigin, nodeRotation));
+			data.setSpawn(Functions.nodeCoordsToWorldCoords(new BlockPos(0, 0, 0), chunkPos, nodeOrigin, nodeRotation));
 			
 			//Mark data as changed for save operation
 			data.markDirty();
