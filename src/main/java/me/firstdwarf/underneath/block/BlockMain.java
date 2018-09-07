@@ -20,15 +20,19 @@ public class BlockMain {
 	 */
 	@GameRegistry.ObjectHolder("underneath:exampleblock")
 	public static NaturalBlock exampleBlock;
+	@GameRegistry.ObjectHolder("underneath:deepstone")
+	public static NaturalBlock deepStone;
 	
 	@GameRegistry.ObjectHolder("underneath:orecopper")
 	public static OreBlock oreCopper;
 	
+	//TODO: Add default information or vanilla comparisons
 	/**
 	 * Call the setup method to initialize every new block added
 	 * Current syntax: field, name of field (camelCase), hardness, blast resistance, light opacity, required tool type
 	 */
 	public static void createBlocks()	{
+		setup(deepStone, "deepStone", 20f, 20f, 255, "pickaxe");
 		setup(exampleBlock, "exampleBlock", 20f, 20F, 255, "pickaxe");
 		setup(oreCopper, "oreCopper", 20f, 20f, 255, "pickaxe");
 	}

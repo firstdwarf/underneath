@@ -12,6 +12,7 @@ import net.minecraft.world.gen.IChunkGenerator;
 
 import javax.annotation.Nullable;
 
+import me.firstdwarf.underneath.block.BlockMain;
 import me.firstdwarf.underneath.utilities.Functions;
 import me.firstdwarf.underneath.world.node.INodeProvider;
 import me.firstdwarf.underneath.world.node.NodeGen;
@@ -55,7 +56,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         for (int i = 0; i <= 15; i++)	{
         	for (int j = 1; j <= 254; j++)	{
         		for (int k = 0; k <= 15; k++)	{
-        			chunkPrimer.setBlockState(i, j, k, Blocks.STONE.getDefaultState());
+        			chunkPrimer.setBlockState(i, j, k, BlockMain.deepStone.getDefaultState());
         		}
         	}
         }

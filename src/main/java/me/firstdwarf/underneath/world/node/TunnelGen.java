@@ -17,12 +17,8 @@ import net.minecraft.world.chunk.ChunkPrimer;
 
 public class TunnelGen {
 	
-	//TODO: Use neighbor boolean array
+	//TODO: Add global tunnel count for weight calculations
 	public static ConcurrentHashMap<String, byte[]> chunkTunnelEndpoints = new ConcurrentHashMap<>();
-	
-	public static boolean checkPath(World world, ChunkPos chunkPos)	{
-		return true;
-	}
 	
 	/**
 	 * This method produces and stores a packed byte array representing the tunnel locations in a chunk.
@@ -507,6 +503,8 @@ public class TunnelGen {
 	 */
 	public static ChunkPrimer connectEndpoints(Random random, ChunkPrimer chunkPrimer, BlockPos p1, BlockPos p2)	{
 		
+		//TODO: Put prior weight constant into config file
+
 		/*
 		 * The algorithm begins by placing each block position along a generated pathway into a HashMap.
 		 * Each entry of the map has the block position as a key and stores a boolean value.
