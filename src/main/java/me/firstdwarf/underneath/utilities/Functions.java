@@ -4,12 +4,15 @@ import java.util.HashMap;
 import java.util.Random;
 
 import me.firstdwarf.underneath.core.Config;
+import me.firstdwarf.underneath.world.node.TunnelGen;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public class Functions {
+	
 	//TODO: Keep an eye out for step downs without free space
 	public static HashMap<BlockPos, Boolean> generateTunnelCell(Random random, HashMap<BlockPos, Boolean> airMap)	{
 		int blankPercentage = Config.tunnelAirWeight;
@@ -73,6 +76,8 @@ public class Functions {
 		}
 		return airMap;
 	}
+	
+	//TODO: Consider allowing finer control of cave generation- perhaps on a per-node basis
 	public static HashMap<BlockPos, Boolean> generateCaveCell(Random random, HashMap<BlockPos, IBlockState> stateMap, int range)	{
 		int blankPercentage = Config.caveAirWeight;
 		int maxIterations = Config.caveCellStageCount;
@@ -113,59 +118,59 @@ public class Functions {
 		}
 		return airMap;
 	}
-	public static HashMap<BlockPos, Boolean> generateCaveCell(Random random, BlockPos max, BlockPos min, int range)	{
-		int blankPercentage = Config.caveAirWeight;
-		int maxIterations = Config.caveCellStageCount;
-		HashMap<BlockPos, Boolean> airMap = new HashMap<>();
-		for (int i = min.getX() - range; i <= max.getX() + range; i++)	{
-			for (int j = min.getY(); j <= max.getY() + range; j++)	{
-				for (int k = min.getZ() - range; k <= max.getZ() + range; k++)	{
-					boolean b = (random.nextInt(100) + 1) <= blankPercentage;
-					airMap.put(new BlockPos(i, j, k), b);
-				}
-			}
-		}
-		for (int i = min.getX(); i <= max.getX(); i++)	{
-			for (int j = min.getY(); j <= max.getY(); j++)	{
-				for (int k = min.getZ(); k <= max.getZ(); k++)	{
-					airMap.put(new BlockPos(i, j, k), true);
-				}
-			}
-		}
-		for (int l = 0; l <= maxIterations; l++)	{
-			for (int i = min.getX() - range; i <= max.getX() + range; i++)	{
-				for (int j = min.getY(); j <= max.getY() + range; j++)	{
-					for (int k = min.getZ() - range; k <= max.getZ() + range; k++)	{
-						int neighborAirCount = 0;
-						for (int x = -1; x <= 1; x++)	{
-							for (int y = -1; y <= 1; y++)	{
-								for (int z = -1; z <= 1; z++)	{
-									if (airMap.get(new BlockPos(i + x, j + y, k + z)) != null
-											&& airMap.get(new BlockPos(i + x, j + y, k + z)))	{
-										neighborAirCount++;
-									}
-								}
-							}
-						}
-						if (neighborAirCount >= Config.caveCellAirRule)	{
-							airMap.put(new BlockPos(i, j, k), true);
-						}
-						else	{
-							airMap.put(new BlockPos(i, j, k), false);
-						}
-					}
-				}
-			}
-		}
-		for (int i = min.getX(); i <= max.getX(); i++)	{
-			for (int j = min.getY(); j <= max.getY(); j++)	{
-				for (int k = min.getZ(); k <= max.getZ(); k++)	{
-					airMap.put(new BlockPos(i, j, k), true);
-				}
-			}
-		}
-		return airMap;
-	}
+//	public static HashMap<BlockPos, Boolean> generateCaveCell(Random random, BlockPos max, BlockPos min, int range)	{
+//		int blankPercentage = Config.caveAirWeight;
+//		int maxIterations = Config.caveCellStageCount;
+//		HashMap<BlockPos, Boolean> airMap = new HashMap<>();
+//		for (int i = min.getX() - range; i <= max.getX() + range; i++)	{
+//			for (int j = min.getY(); j <= max.getY() + range; j++)	{
+//				for (int k = min.getZ() - range; k <= max.getZ() + range; k++)	{
+//					boolean b = (random.nextInt(100) + 1) <= blankPercentage;
+//					airMap.put(new BlockPos(i, j, k), b);
+//				}
+//			}
+//		}
+//		for (int i = min.getX(); i <= max.getX(); i++)	{
+//			for (int j = min.getY(); j <= max.getY(); j++)	{
+//				for (int k = min.getZ(); k <= max.getZ(); k++)	{
+//					airMap.put(new BlockPos(i, j, k), true);
+//				}
+//			}
+//		}
+//		for (int l = 0; l <= maxIterations; l++)	{
+//			for (int i = min.getX() - range; i <= max.getX() + range; i++)	{
+//				for (int j = min.getY(); j <= max.getY() + range; j++)	{
+//					for (int k = min.getZ() - range; k <= max.getZ() + range; k++)	{
+//						int neighborAirCount = 0;
+//						for (int x = -1; x <= 1; x++)	{
+//							for (int y = -1; y <= 1; y++)	{
+//								for (int z = -1; z <= 1; z++)	{
+//									if (airMap.get(new BlockPos(i + x, j + y, k + z)) != null
+//											&& airMap.get(new BlockPos(i + x, j + y, k + z)))	{
+//										neighborAirCount++;
+//									}
+//								}
+//							}
+//						}
+//						if (neighborAirCount >= Config.caveCellAirRule)	{
+//							airMap.put(new BlockPos(i, j, k), true);
+//						}
+//						else	{
+//							airMap.put(new BlockPos(i, j, k), false);
+//						}
+//					}
+//				}
+//			}
+//		}
+//		for (int i = min.getX(); i <= max.getX(); i++)	{
+//			for (int j = min.getY(); j <= max.getY(); j++)	{
+//				for (int k = min.getZ(); k <= max.getZ(); k++)	{
+//					airMap.put(new BlockPos(i, j, k), true);
+//				}
+//			}
+//		}
+//		return airMap;
+//	}
 	public static BlockPos addCoords(BlockPos c1, BlockPos c2)	{
 		return new BlockPos(c1.getX() + c2.getX(), c1.getY() + c2.getY(), c1.getZ() + c2.getZ());
 	}

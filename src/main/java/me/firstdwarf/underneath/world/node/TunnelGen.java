@@ -18,6 +18,7 @@ import net.minecraft.world.chunk.ChunkPrimer;
 public class TunnelGen {
 	
 	//TODO: Add global tunnel count for weight calculations
+	public static int totalBranches = 0;
 	public static ConcurrentHashMap<String, byte[]> chunkTunnelEndpoints = new ConcurrentHashMap<>();
 	
 	/**
@@ -35,7 +36,7 @@ public class TunnelGen {
 	 * @return
 	 */
 	public static ChunkPrimer generateTunnelEndpoints(Random random, World world, ChunkPrimer chunkPrimer,
-			int x1, int z1, INodeProvider node, BlockPos nodeOrigin, int nodeRotation, int nodeIndex)	{
+			int x1, int z1, Node node, BlockPos nodeOrigin, int nodeRotation, int nodeIndex)	{
 		
 		/**
 		 * Byte array formatting for tunnel endpoint information. Each byte represents the following:
@@ -59,7 +60,8 @@ public class TunnelGen {
 		byte[] loadedTags;
 		
 		//Boolean array holding whether or not a chunk is generated in the cardinal directions
-		boolean[] isNeighborLoaded = {world.isChunkGeneratedAt(x1, z1 - 1), world.isChunkGeneratedAt(x1, z1 + 1),
+		//TODO: Double check for -2's and the directionality of any entrances
+		boolean[] isNeighborGenerated = {world.isChunkGeneratedAt(x1, z1 - 1), world.isChunkGeneratedAt(x1, z1 + 1),
 			world.isChunkGeneratedAt(x1 - 1, z1), world.isChunkGeneratedAt(x1 + 1, z1)};
 		
 		//Chunk array holding the neighboring chunks
@@ -69,16 +71,16 @@ public class TunnelGen {
 		EnumFacing[] faceIndex = {EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.EAST};
 		
 		//Place chunk objects into neighborChunk array
-		if (isNeighborLoaded[0])	{
+		if (isNeighborGenerated[0])	{
 			neighborChunks[0] = world.getChunkFromChunkCoords(x1, z1 - 1);
 		}
-		if (isNeighborLoaded[1])	{
+		if (isNeighborGenerated[1])	{
 			neighborChunks[1] = world.getChunkFromChunkCoords(x1, z1 + 1);
 		}
-		if (isNeighborLoaded[2])	{
+		if (isNeighborGenerated[2])	{
 			neighborChunks[2] = world.getChunkFromChunkCoords(x1 - 1, z1);
 		}
-		if (isNeighborLoaded[3])	{
+		if (isNeighborGenerated[3])	{
 			neighborChunks[3] = world.getChunkFromChunkCoords(x1 + 1, z1);
 		}
 		
@@ -152,6 +154,71 @@ public class TunnelGen {
 			//Calculate the average y-coordinate of all located tunnels without dividing by zero
 			if (tunnelCount != 0)	{
 				yAverage /= tunnelCount;
+			}
+			
+			//Remove faces for pre-claimed chunks
+			for (EnumFacing f : availableFaces)	{
+				ChunkPos c = null;
+				boolean removeFace = false;
+				switch (f)	{
+				case NORTH:
+					c = new ChunkPos(x1, z1 - 1);
+					if (NodeGen.chunkNodes.get(c.toString()) != null)	{
+						removeFace = true;
+						if (NodeGen.chunkEntrances.get(c.toString()) != null)	{
+							for (Entrance e : NodeGen.chunkEntrances.get(c.toString()))	{
+								if (e.facing.equals(EnumFacing.SOUTH))	{
+									removeFace = false;
+								}
+							}
+						}
+					}
+					break;
+				case SOUTH:
+					c = new ChunkPos(x1, z1 + 1);
+					if (NodeGen.chunkNodes.get(c.toString()) != null)	{
+						removeFace = true;
+						if (NodeGen.chunkEntrances.get(c.toString()) != null)	{
+							for (Entrance e : NodeGen.chunkEntrances.get(c.toString()))	{
+								if (e.facing.equals(EnumFacing.NORTH))	{
+									removeFace = false;
+								}
+							}
+						}
+					}
+					break;
+				case WEST:
+					c = new ChunkPos(x1 - 1, z1);
+					if (NodeGen.chunkNodes.get(c.toString()) != null)	{
+						removeFace = true;
+						if (NodeGen.chunkEntrances.get(c.toString()) != null)	{
+							for (Entrance e : NodeGen.chunkEntrances.get(c.toString()))	{
+								if (e.facing.equals(EnumFacing.EAST))	{
+									removeFace = false;
+								}
+							}
+						}
+					}
+					break;
+				case EAST:
+					c = new ChunkPos(x1 + 1, z1);
+					if (NodeGen.chunkNodes.get(c.toString()) != null)	{
+						removeFace = true;
+						if (NodeGen.chunkEntrances.get(c.toString()) != null)	{
+							for (Entrance e : NodeGen.chunkEntrances.get(c.toString()))	{
+								if (e.facing.equals(EnumFacing.WEST))	{
+									removeFace = false;
+								}
+							}
+						}
+					}
+					break;
+				default:
+					break;
+				}
+				if (removeFace)	{
+					availableFaces.remove(f);
+				}
 			}
 			
 			//Force a chunk with tunnels coming in to produce at least one new endpoint if it has an ungenerated neighbor to enter
@@ -235,9 +302,7 @@ public class TunnelGen {
 			if (flaggedEntrances != null)	{
 				for (Entrance e : flaggedEntrances)	{
 					
-					//Entrances are retrieved in world coordinates, already rotated, that must be converted to chunk coordinates
-					//TODO: Swap this around. Should be extremely simple
-					e = e.setCoords(Functions.worldCoordsToChunkCoords(e.coords));
+					//Entrances are retrieved in chunk coordinates, already rotated
 					entrances.add(e);
 				}
 			}
@@ -297,7 +362,7 @@ public class TunnelGen {
 		}
 		
 		//Copy endpoint position from neighbors and flag endpoints
-		if (isNeighborLoaded[0])	{
+		if (isNeighborGenerated[0])	{
 			
 			//Load tunnel information from neighboring chunk
 			loadedTags = chunkTunnelEndpoints.get(neighborChunks[0].getPos().toString());
@@ -311,7 +376,7 @@ public class TunnelGen {
 		}
 		
 		//Copy endpoint position from neighbors and flag endpoints
-		if (isNeighborLoaded[1])	{
+		if (isNeighborGenerated[1])	{
 			
 			//Load tunnel information from neighboring chunk
 			loadedTags = chunkTunnelEndpoints.get(neighborChunks[1].getPos().toString());
@@ -325,7 +390,7 @@ public class TunnelGen {
 		}
 		
 		//Copy endpoint position from neighbors and flag endpoints
-		if (isNeighborLoaded[2])	{
+		if (isNeighborGenerated[2])	{
 			
 			//Load tunnel information from neighboring chunk
 			loadedTags = chunkTunnelEndpoints.get(neighborChunks[2].getPos().toString());
@@ -339,7 +404,7 @@ public class TunnelGen {
 		}
 		
 		//Copy endpoint position from neighbors and flag endpoints
-		if (isNeighborLoaded[3])	{
+		if (isNeighborGenerated[3])	{
 			
 			//Load tunnel information from neighboring chunk
 			loadedTags = chunkTunnelEndpoints.get(neighborChunks[3].getPos().toString());
@@ -373,7 +438,7 @@ public class TunnelGen {
 	 * @return
 	 */
 	public static ChunkPrimer generateTunnelLinks(Random random, World world, ChunkPrimer chunkPrimer,
-			int x, int z, INodeProvider node, BlockPos nodeOrigin, int nodeRotation, int nodeIndex)	{
+			int x, int z, Node node, BlockPos nodeOrigin, int nodeRotation, int nodeIndex)	{
 		
 		//Object holding the chunk coordinates of the chunk to generate
 		ChunkPos chunkPos = new ChunkPos(x, z);

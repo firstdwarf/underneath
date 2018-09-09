@@ -26,7 +26,7 @@ public class CommonProxy {
 	public static Configuration config;
 	
 	public void init(FMLInitializationEvent e) {
-
+		NodeGen.register();
 	}
 
 	public void preInit(FMLPreInitializationEvent e) {
@@ -36,7 +36,6 @@ public class CommonProxy {
 		Config.loadConfig();
 		
         UnderneathDimensions.init();
-        NodeGen.register();
 
         MinecraftForge.EVENT_BUS.register(EventHandler.class);
         MinecraftForge.EVENT_BUS.register(DynamicLightingHandler.class);

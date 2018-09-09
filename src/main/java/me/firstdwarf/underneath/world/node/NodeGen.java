@@ -4,24 +4,26 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
+import me.firstdwarf.underneath.core.Config;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public class NodeGen {
 	
-	//TODO: Allow forced node choices
+	//TODO: Allow forced node choices- store returning values in ArrayList and repeat number line
 	//ArrayList and ConcurrentHashMaps to store all node types, chunk node indices, and node entrances in a chunk
-	public static ArrayList<INodeProvider> nodeTypes = new ArrayList<>(0);
+	public static ArrayList<Node> nodeTypes = new ArrayList<>(0);
 	public static ConcurrentHashMap<String, Integer> chunkNodes = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<String, ArrayList<Entrance>> chunkEntrances = new ConcurrentHashMap<>();
 	
-	//Called in the common proxy during preinitialization
+	//Called in the common proxy during initialization
 	public static void register()	{
 		
 		//Constructs nodes to store them in the node type ArrayList
-		Spawn spawn = new Spawn();
-		nodeTypes.add(spawn);
+		nodeTypes.add(new Spawn());
+		nodeTypes.add(new Shaft());
 	}
 	
 	/**
@@ -33,7 +35,7 @@ public class NodeGen {
 	 * @param nodeOrigin is the position of the center of the node in chunk coordinates
 	 * @param nodeRotation is the amount the node is rotated in degrees
 	 */
-	public static void generateNodes(World world, Random random, ChunkPos chunkPos, INodeProvider node,
+	public static void generateNodes(World world, Random random, ChunkPos chunkPos, Node node,
 			BlockPos nodeOrigin, int nodeRotation)	{
 		
 		//The node to be generated can and will be null
@@ -56,10 +58,10 @@ public class NodeGen {
 	 * @return either the node index of the selected node, -1, or -2
 	 */
 	public static int selectNodes(World world, Random random, ChunkPos chunkPos,
-			BlockPos nodeOrigin, int nodeRotation)	{
+			BlockPos nodeOrigin, int nodeRotation, ArrayList<EnumFacing> facesLinked)	{
 		
 		//Weight representing the chances to have no node
-		int blankWeight = 10;
+		int blankWeight = Config.blankWeight;
 		
 		//A running total used to create intervals in a number line
 		int totalWeight = blankWeight;
@@ -77,10 +79,10 @@ public class NodeGen {
 		numberLine[0] = blankWeight;
 		
 		//Loop through all node types
-		for (INodeProvider node : nodeTypes)	{
+		for (Node node : nodeTypes)	{
 			
 			//Calculate a weighted likelihood of the node to be selected based on world conditions
-			int nodeWeight = node.getWeight(world, chunkPos, nodeOrigin, nodeRotation);
+			int nodeWeight = node.getWeight(world, chunkPos, nodeOrigin, nodeRotation, facesLinked);
 			
 			//If nodeWeight is returned as -1, this node must be the choice
 			if (nodeWeight == -1)	{
