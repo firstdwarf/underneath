@@ -14,7 +14,7 @@ import net.minecraft.world.World;
 public class Spawn extends Node	{
 	
 	public Spawn()	{
-		super("spawn", 3);
+		super("spawn", 3, true);
 		
 		this.entrances.add(new Entrance(EnumFacing.SOUTH, 0, 0, 5));
 		this.entrances.add(new Entrance(EnumFacing.NORTH, 0, 0, -5));
@@ -28,9 +28,14 @@ public class Spawn extends Node	{
 
 	@Override
 	public void setStates() {
-		super.addCuboid(new BlockPos(-5, 0, -5), new BlockPos(5, 3, 5), Blocks.AIR.getDefaultState());
-		this.stateMap.put(new BlockPos(0, 0, 0), Blocks.TORCH.getDefaultState());
-		this.stateMap.put(new BlockPos(0, -1, 0), BlockMain.deepStone.getDefaultState());
+//		super.addCuboid(new BlockPos(-5, 0, -5), new BlockPos(5, 3, 5), this.OPEN_AIR);
+//		super.addCuboid(new BlockPos(0, 0, 0), new BlockPos(0, 7, 0), this.OPEN_AIR);
+		
+		super.addCuboid(new BlockPos(-10, 0, -10), new BlockPos(10, 3, 10), this.OPEN_AIR);
+		super.addCuboid(new BlockPos(0, 0, 0), new BlockPos(0, 7, 0), this.OPEN_AIR);
+		
+		this.blockMap.put(new BlockPos(0, 8, 0), Blocks.BONE_BLOCK.getDefaultState());
+		this.blockMap.put(new BlockPos(1, 0, 1), Blocks.TORCH.getDefaultState());
 	}
 	
 	@Override

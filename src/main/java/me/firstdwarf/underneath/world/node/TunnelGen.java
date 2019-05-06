@@ -104,6 +104,8 @@ public class TunnelGen {
 			//An average of adjacent tunnel endpoints from neighboring chunks used to generate additional endpoints nearby
 			int yAverage = 0;
 			
+			int slope = Config.incline;
+			
 			//The total number of connections coming in to this chunk
 			int tunnelCount = 0;
 			for (int i = 0; i < 4; i++)	{
@@ -156,7 +158,14 @@ public class TunnelGen {
 				yAverage /= tunnelCount;
 			}
 			
-			//Remove faces for pre-claimed chunks
+			if (yAverage >= 255)	{
+				System.out.println("WARNING: Tunnel endpoints too high");
+			}
+			
+			ArrayList<EnumFacing> temp = new ArrayList<>();
+			
+			//Remove faces for pre-claimed chunks. Currently a bit of spaghetti code
+			//TODO: Potentially clean this up- avoiding concurrent modification exception
 			for (EnumFacing f : availableFaces)	{
 				ChunkPos c = null;
 				boolean removeFace = false;
@@ -216,13 +225,22 @@ public class TunnelGen {
 				default:
 					break;
 				}
-				if (removeFace)	{
-					availableFaces.remove(f);
+				if (!removeFace)	{
+					temp.add(f);
 				}
 			}
 			
+			availableFaces = temp;
+			
+			//Temporary line for alternative height method
+			//yAverage = target;
+			
 			//Force a chunk with tunnels coming in to produce at least one new endpoint if it has an ungenerated neighbor to enter
 			if (tunnelCount >= 1)	{
+				
+				if (availableFaces.isEmpty())	{
+					System.out.println("WARNING: Null face at " + new ChunkPos(x1, z1).toString());
+				}
 				
 				//This will place entrances on available faces while removing taken faces
 				while (!availableFaces.isEmpty())	{
@@ -239,19 +257,19 @@ public class TunnelGen {
 					switch (chosenFace)	{
 					case NORTH:
 						dataArray[0] |= 0x08;
-						dataArray[1] = (byte) (yAverage + random.nextInt(5) - 2);
+						dataArray[1] = (byte) (yAverage + random.nextInt(slope) - slope);
 						break;
 					case SOUTH:
 						dataArray[0] |= 0x04;
-						dataArray[2] = (byte) (yAverage + random.nextInt(5) - 2);
+						dataArray[2] = (byte) (yAverage + random.nextInt(slope) - slope);
 						break;
 					case WEST:
 						dataArray[0] |= 0x02;
-						dataArray[3] = (byte) (yAverage + random.nextInt(5) - 2);
+						dataArray[3] = (byte) (yAverage + random.nextInt(slope) - slope);
 						break;
 					case EAST:
 						dataArray[0] |= 0x01;
-						dataArray[4] = (byte) (yAverage + random.nextInt(5) - 2);
+						dataArray[4] = (byte) (yAverage + random.nextInt(slope) - slope);
 						break;
 					default:
 						break;

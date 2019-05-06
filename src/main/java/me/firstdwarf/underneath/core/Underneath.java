@@ -8,14 +8,19 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+
+import java.util.ArrayList;
+
 import org.apache.logging.log4j.Logger;
 
 @Mod(modid = Underneath.MODID, name = Underneath.NAME, version = Underneath.VERSION, useMetadata = true)
 public class Underneath {
-
+	
 	public static final String MODID = "underneath";
 	public static final String NAME = "underneath";
 	public static final String VERSION = "0.1";
+	
+	public static ArrayList<String> objResourceLocations = new ArrayList<>(0);
 	
 	@SidedProxy(clientSide = "me.firstdwarf.underneath.core.ClientProxy", 
 			serverSide = "me.firstdwarf.underneath.core.CommonProxy")
@@ -24,7 +29,7 @@ public class Underneath {
 	@Mod.Instance
 	public static Underneath instance;
 	
-	public Logger logger;
+	public static Logger logger;
 
 	@Mod.EventHandler
     public void serverLoad(FMLServerStartingEvent e) {

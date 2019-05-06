@@ -2,7 +2,7 @@ package me.firstdwarf.underneath.command;
 
 import me.firstdwarf.underneath.world.CustomTeleporter;
 import me.firstdwarf.underneath.world.SaveData;
-import me.firstdwarf.underneath.world.UnderneathDimensions;
+import me.firstdwarf.underneath.world.dimension.CustomDimension;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -48,14 +48,13 @@ public class TeleportWorldCommand extends CommandBase {
         WorldServer world = server.getWorld(dimensionId);
         World w = (World) world;
         BlockPos target = world.getSpawnPoint();
-        if (world.provider.getDimensionType().equals(UnderneathDimensions.underneathDimensionType))	{
+        if (world.provider.getDimensionType().equals(CustomDimension.underneathDimensionType))	{
         	SaveData data = SaveData.getData(w);
         	target = data.spawn;
         	if (target == null)	{
         		target = w.provider.getRandomizedSpawnPoint();
         	}
         }
-        target = target.add(0, 1, 0);
         world.getMinecraftServer().getPlayerList().transferPlayerToDimension((EntityPlayerMP) sender, dimensionId, new CustomTeleporter(world, target.getX(), target.getY(), target.getZ()));
     }
 }

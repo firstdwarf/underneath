@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import me.firstdwarf.underneath.world.ChunkGeneratorUnderneath;
 import me.firstdwarf.underneath.world.CustomTeleporter;
 import me.firstdwarf.underneath.world.SaveData;
-import me.firstdwarf.underneath.world.UnderneathDimensions;
+import me.firstdwarf.underneath.world.dimension.CustomDimension;
 import me.firstdwarf.underneath.world.node.Spawn;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;

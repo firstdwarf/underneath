@@ -16,7 +16,8 @@ import javax.annotation.Nullable;
 
 import me.firstdwarf.underneath.block.BlockMain;
 import me.firstdwarf.underneath.core.Config;
-import me.firstdwarf.underneath.utilities.Functions;
+import me.firstdwarf.underneath.utilities.ChunkSaveFile;
+import me.firstdwarf.underneath.world.dimension.CustomDimension;
 import me.firstdwarf.underneath.world.node.Node;
 import me.firstdwarf.underneath.world.node.NodeGen;
 import me.firstdwarf.underneath.world.node.TunnelGen;
@@ -30,6 +31,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
  
     private World world;
     private Random random;
+    private Decorator decorator;
 
     /**
      * Constructor
@@ -76,19 +78,31 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         
         //Choose a random placement and orientation within the chunk for a node
         int nodeRotation = 90*random.nextInt(4);
-        BlockPos nodeOrigin = new BlockPos(random.nextInt(12) + 2, random.nextInt(128) + 63, random.nextInt(12) + 2);
+        BlockPos nodeOrigin = new BlockPos(random.nextInt(12) + 2, 90, random.nextInt(12) + 2);
         
         //Load in the spawn location for this world
         SaveData data = SaveData.getData(world);
 		BlockPos spawn = data.spawn;
 		
 		//If the spawn is about to be set, move the nodeOrigin to the relative position of the old world spawn. For default spawning
+//		if (spawn == null)	{
+//			nodeOrigin = Functions.worldCoordsToChunkCoords(world.getSpawnPoint());
+//		}
 		if (spawn == null)	{
-			nodeOrigin = Functions.worldCoordsToChunkCoords(world.getSpawnPoint());
+			nodeOrigin = new BlockPos(nodeOrigin.getX(), 245, nodeOrigin.getZ());
+			world.setSpawnPoint(nodeOrigin);
 		}
+		
+		if (nodeOrigin.getY() >= 255)	{
+        	System.out.println("WARNING: Node Origin too high for chunk " + chunkPos.toString());
+        }
+		
+		int slope = Config.incline;
         
 		//Keep track of which neighboring faces have available tunnels linked to them
 		ArrayList<EnumFacing> facesLinked = new ArrayList<>();
+		
+		int randSlope = (random.nextInt(slope) - slope)/2;
 		
         //Check all four neighboring chunks and move node to match the last found neighbor, linking to necessary north entrance
         if (world.isChunkGeneratedAt(x, z - 1))	{
@@ -101,7 +115,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         	
         	if ((tunnelInfo[0] & 0x04) != 0)	{
         		nodeRotation = 0;
-        		nodeOrigin = new BlockPos(nodeOrigin.getX(), tunnelInfo[2] + random.nextInt(5) - 3, nodeOrigin.getZ());
+        		nodeOrigin = new BlockPos(nodeOrigin.getX(), (tunnelInfo[2] & 0xff) + randSlope, nodeOrigin.getZ());
         		facesLinked.add(EnumFacing.NORTH);
         	}
         }
@@ -115,7 +129,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         	
         	if ((tunnelInfo[0] & 0x01) != 0)	{
         		nodeRotation = 90;
-        		nodeOrigin = new BlockPos(nodeOrigin.getX(), tunnelInfo[4] + random.nextInt(5) - 3, nodeOrigin.getZ());
+        		nodeOrigin = new BlockPos(nodeOrigin.getX(), (tunnelInfo[4] & 0xff) + randSlope, nodeOrigin.getZ());
         		facesLinked.add(EnumFacing.WEST);
         	}
         }
@@ -129,7 +143,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         	
         	if ((tunnelInfo[0] & 0x08) != 0)	{
         		nodeRotation = 180;
-        		nodeOrigin = new BlockPos(nodeOrigin.getX(), tunnelInfo[1] + random.nextInt(5) - 3, nodeOrigin.getZ());
+        		nodeOrigin = new BlockPos(nodeOrigin.getX(), (tunnelInfo[1] & 0xff) + randSlope, nodeOrigin.getZ());
         		facesLinked.add(EnumFacing.SOUTH);
         	}
         }
@@ -143,9 +157,16 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         	
         	if ((tunnelInfo[0] & 0x01) != 0)	{
         		nodeRotation = 270;
-        		nodeOrigin = new BlockPos(nodeOrigin.getX(), tunnelInfo[3] + random.nextInt(5) - 3, nodeOrigin.getZ());
+        		nodeOrigin = new BlockPos(nodeOrigin.getX(), (tunnelInfo[3] & 0xff) + randSlope, nodeOrigin.getZ());
         		facesLinked.add(EnumFacing.EAST);
         	}
+        }
+        
+        if (nodeOrigin.getY() >= 255)	{
+        	System.out.println("WARNING: Node Origin too high for chunk " + chunkPos.toString());
+        }
+        if (nodeOrigin.getY() <= 0)	{
+        	System.out.println("WARNING: Node Origin too low for chunk " + chunkPos.toString());
         }
         
         //Select a node to spawn in the chunk, indicated by the node index
@@ -159,6 +180,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
          * This chunk shouldn't have an entry yet (it's still being generated).
          * If it does, another chunk flagged it because its node needed more room.
          */
+        //TODO: Make sure that the -2's get stored to world data
         if (NodeGen.chunkNodes.containsKey(chunkPos.toString()))	{
         	//Sets the node index to -2 if it has been flagged as -2 (the space needed flag)
         	if (NodeGen.chunkNodes.get(chunkPos.toString()) == -2)	{
@@ -216,6 +238,8 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
     	//All nodes extend the abstract class Node
     	Node node;
     	
+    	this.decorator = new Decorator();
+    	
     	//Position of the chunk to populate
     	ChunkPos chunkPos = new ChunkPos(x, z);
     	
@@ -240,6 +264,22 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
     	
     	//Generate the node in question, placing all blocks in the node, clearing out a cave, etc
     	NodeGen.generateNodes(world, random, chunkPos, node, nodeOrigin, nodeRotation);
+    	
+    	ChunkSaveFile chunkData = ChunkSaveFile.getSave(world, chunkPos, false);
+    	chunkData.setBlocksFromMap(world);
+    	chunkData.clearData();
+    	
+//    	SaveData data = SaveData.getData(world);
+//    	if (data.airBlocks.containsKey(chunkPos.toString()))	{
+//    		for (BlockPos p : data.airBlocks.get(chunkPos.toString()))	{
+//    			world.setBlockState(p, Blocks.AIR.getDefaultState());
+//    		}
+//    		data.airBlocks.remove(chunkPos.toString());
+//    		data.toClear.add(chunkPos.toString());
+//    	}
+    	
+    	//Generates veins of materials
+    	//this.decorator.generateVeins(world, random, chunkPos);
     	
     	//Resets terrain for debug mode
     	if (Config.debugMode)	{

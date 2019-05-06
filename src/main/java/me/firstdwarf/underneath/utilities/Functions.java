@@ -4,12 +4,14 @@ import java.util.HashMap;
 import java.util.Random;
 
 import me.firstdwarf.underneath.core.Config;
-import me.firstdwarf.underneath.world.node.TunnelGen;
+import me.firstdwarf.underneath.world.SaveData;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class Functions {
 	
@@ -78,99 +80,114 @@ public class Functions {
 	}
 	
 	//TODO: Consider allowing finer control of cave generation- perhaps on a per-node basis
-	public static HashMap<BlockPos, Boolean> generateCaveCell(Random random, HashMap<BlockPos, IBlockState> stateMap, int range)	{
+	public static HashMap<BlockPos, Boolean> generateCaveCell(Random random, HashMap<BlockPos, IBlockState> blockMap,
+			HashMap<BlockPos, Boolean> airMap, int range, boolean level)	{
+		int ymin = level ? 0 : -1*range;
 		int blankPercentage = Config.caveAirWeight;
 		int maxIterations = Config.caveCellStageCount;
-		HashMap<BlockPos, Boolean> airMap = new HashMap<>();
-		for (BlockPos p : stateMap.keySet())	{
+		HashMap<BlockPos, Boolean> tempMap = new HashMap<>();
+		for (BlockPos p : airMap.keySet())	{
 			for (int x = -1*range; x <= range; x++)	{
-				for (int y = 0; y <= range; y++)	{
+				for (int y = ymin; y <= range; y++)	{
 					for (int z = -1*range; z <= range; z++)	{
 						boolean b = (random.nextInt(100) + 1) <= blankPercentage;
-						airMap.put(new BlockPos(p.getX() + x, p.getY() + y, p.getZ() + z), b);
+						b &= !blockMap.containsKey(new BlockPos(p.getX() + x, p.getY() + y, p.getZ() + z));
+						tempMap.put(new BlockPos(p.getX() + x, p.getY() + y, p.getZ() + z), b);
 					}
 				}
 			}
 		}
-		for (BlockPos p : stateMap.keySet())	{
-			airMap.put(p, true);
+		for (BlockPos p : airMap.keySet())	{
+			tempMap.put(p, true);
 		}
 		for (int l = 0; l <= maxIterations; l++)	{
-			for (BlockPos p : airMap.keySet())	{
+			for (BlockPos p : tempMap.keySet())	{
 				int neighborAirCount = 0;
 				for (int x = -1; x <= 1; x++)	{
 					for (int y = -1; y <= 1; y++)	{
 						for (int z = -1; z <= 1; z++)	{
-							if (airMap.get(new BlockPos(p.getX() + x, p.getY() + y, p.getZ() + z)) != null
-									&& airMap.get(new BlockPos(p.getX() + x, p.getY() + y, p.getZ() + z)))	{
+							if (tempMap.containsKey(new BlockPos(p.getX() + x, p.getY() + y, p.getZ() + z))
+									&& tempMap.get(new BlockPos(p.getX() + x, p.getY() + y, p.getZ() + z)))	{
 								neighborAirCount++;
 							}
 						}
 					}
 				}
-				if (neighborAirCount >= Config.caveCellAirRule)	{
-					airMap.put(p, true);
+				if (airMap.containsKey(new BlockPos(p.getX(), p.getY(), p.getZ())) || neighborAirCount >= Config.caveCellAirRule
+						&& !blockMap.containsKey(new BlockPos(p.getX(), p.getY(), p.getZ())))	{
+					tempMap.put(p, true);
 				}
 				else	{
-					airMap.put(p, false);
+					tempMap.put(p, false);
 				}
 			}
 		}
-		return airMap;
+		return tempMap;
 	}
-//	public static HashMap<BlockPos, Boolean> generateCaveCell(Random random, BlockPos max, BlockPos min, int range)	{
-//		int blankPercentage = Config.caveAirWeight;
-//		int maxIterations = Config.caveCellStageCount;
-//		HashMap<BlockPos, Boolean> airMap = new HashMap<>();
-//		for (int i = min.getX() - range; i <= max.getX() + range; i++)	{
-//			for (int j = min.getY(); j <= max.getY() + range; j++)	{
-//				for (int k = min.getZ() - range; k <= max.getZ() + range; k++)	{
-//					boolean b = (random.nextInt(100) + 1) <= blankPercentage;
-//					airMap.put(new BlockPos(i, j, k), b);
-//				}
-//			}
+	
+	public static HashMap<BlockPos, Boolean> generateFluidCave(Random random, HashMap<BlockPos, IBlockState> blockMap,
+			HashMap<BlockPos, Boolean> fluidMap, int range, boolean level)	{
+		int ymax = level ? 0 : range;
+		int blankPercentage = Config.fluidWeight;
+		int maxIterations = Config.fluidCellStageCount;
+		HashMap<BlockPos, Boolean> tempMap = new HashMap<>();
+		for (BlockPos p : fluidMap.keySet())	{
+			for (int x = -1*range; x <= range; x++)	{
+				for (int y = -1*range; y <= ymax; y++)	{
+					for (int z = -1*range; z <= range; z++)	{
+						boolean b = (random.nextInt(100) + 1) <= blankPercentage;
+						b &= !blockMap.containsKey(new BlockPos(p.getX() + x, p.getY() + y, p.getZ() + z));
+						tempMap.put(new BlockPos(p.getX() + x, p.getY() + y, p.getZ() + z), b);
+					}
+				}
+			}
+		}
+		for (BlockPos p : fluidMap.keySet())	{
+			tempMap.put(p, true);
+		}
+		for (int l = 0; l <= maxIterations; l++)	{
+			for (BlockPos p : tempMap.keySet())	{
+				int neighborFluidCount = 0;
+				for (int x = -1; x <= 1; x++)	{
+					for (int y = -1; y <= 1; y++)	{
+						for (int z = -1; z <= 1; z++)	{
+							if (tempMap.containsKey(new BlockPos(p.getX() + x, p.getY() + y, p.getZ() + z))
+									&& tempMap.get(new BlockPos(p.getX() + x, p.getY() + y, p.getZ() + z)))	{
+								neighborFluidCount++;
+							}
+						}
+					}
+				}
+				if (fluidMap.containsKey(new BlockPos(p.getX(), p.getY(), p.getZ())) || neighborFluidCount >= Config.fluidCellRule
+						&& !blockMap.containsKey(new BlockPos(p.getX(), p.getY(), p.getZ())))	{
+					tempMap.put(p, true);
+				}
+				else	{
+					tempMap.put(p, false);
+				}
+			}
+		}
+		return tempMap;
+	}
+
+	public static void placeBlockSafely(World world, BlockPos pos, IBlockState state)	{
+		
+		ChunkPos chunkPos = new ChunkPos(pos.getX() >> 4, pos.getZ() >> 4);
+//		if (!(world.isBlockLoaded(pos) && world.getBlockState(pos).equals(state)))	{
+			if (world.isChunkGeneratedAt(chunkPos.x, chunkPos.z))	{
+//				System.out.println("Chunk is " + chunkPos.toString());
+//				System.out.println("Position is " + pos.toString());
+				world.setBlockState(pos, state);
+				System.out.println("Set block in chunk " + chunkPos.toString());
+			}
+			else	{
+				System.out.println("Saving additional data for chunk " + chunkPos.toString());
+				ChunkSaveFile save = ChunkSaveFile.getSave(world, chunkPos, true);
+				save.addToMap(pos, state);
+			}
 //		}
-//		for (int i = min.getX(); i <= max.getX(); i++)	{
-//			for (int j = min.getY(); j <= max.getY(); j++)	{
-//				for (int k = min.getZ(); k <= max.getZ(); k++)	{
-//					airMap.put(new BlockPos(i, j, k), true);
-//				}
-//			}
-//		}
-//		for (int l = 0; l <= maxIterations; l++)	{
-//			for (int i = min.getX() - range; i <= max.getX() + range; i++)	{
-//				for (int j = min.getY(); j <= max.getY() + range; j++)	{
-//					for (int k = min.getZ() - range; k <= max.getZ() + range; k++)	{
-//						int neighborAirCount = 0;
-//						for (int x = -1; x <= 1; x++)	{
-//							for (int y = -1; y <= 1; y++)	{
-//								for (int z = -1; z <= 1; z++)	{
-//									if (airMap.get(new BlockPos(i + x, j + y, k + z)) != null
-//											&& airMap.get(new BlockPos(i + x, j + y, k + z)))	{
-//										neighborAirCount++;
-//									}
-//								}
-//							}
-//						}
-//						if (neighborAirCount >= Config.caveCellAirRule)	{
-//							airMap.put(new BlockPos(i, j, k), true);
-//						}
-//						else	{
-//							airMap.put(new BlockPos(i, j, k), false);
-//						}
-//					}
-//				}
-//			}
-//		}
-//		for (int i = min.getX(); i <= max.getX(); i++)	{
-//			for (int j = min.getY(); j <= max.getY(); j++)	{
-//				for (int k = min.getZ(); k <= max.getZ(); k++)	{
-//					airMap.put(new BlockPos(i, j, k), true);
-//				}
-//			}
-//		}
-//		return airMap;
-//	}
+	}
+	
 	public static BlockPos addCoords(BlockPos c1, BlockPos c2)	{
 		return new BlockPos(c1.getX() + c2.getX(), c1.getY() + c2.getY(), c1.getZ() + c2.getZ());
 	}
@@ -180,6 +197,9 @@ public class Functions {
 	}
 	public static BlockPos worldCoordsToChunkCoords(BlockPos worldCoords)	{
 		return new BlockPos(worldCoords.getX() & 0x0f, worldCoords.getY(), worldCoords.getZ() & 0x0f);
+	}
+	public static BlockPos chunkCoordsToWorldCoords(BlockPos chunkCoords, ChunkPos chunkPos)	{
+		return new BlockPos(chunkPos.getXStart() + chunkCoords.getX(), chunkCoords.getY(), chunkPos.getZStart() + chunkCoords.getZ());
 	}
 	public static void setBlockFromNodeCoordinates(World world, ChunkPos chunkPos,
 			BlockPos origin, BlockPos coords, int rotation, IBlockState state)	{
@@ -191,6 +211,7 @@ public class Functions {
 		origin = chunkPos.getBlock(origin.getX(), origin.getY(), origin.getZ());
 		switch (rotation)	{
 		case 0:
+			Functions.placeBlockSafely(world, coords, state);
 			world.setBlockState(new BlockPos(coords.getX() + origin.getX(), coords.getY() + origin.getY(),
 					coords.getZ() + origin.getZ()), state, flag);
 			break;

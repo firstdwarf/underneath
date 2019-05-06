@@ -1,5 +1,6 @@
 package me.firstdwarf.underneath.world.node;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +18,7 @@ public class NodeGen {
 	public static ArrayList<Node> nodeTypes = new ArrayList<>(0);
 	public static ConcurrentHashMap<String, Integer> chunkNodes = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<String, ArrayList<Entrance>> chunkEntrances = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<String, ArrayList<BlockPos>> chunkAirMap = new ConcurrentHashMap<>();
 	
 	//Called in the common proxy during initialization
 	public static void register()	{
@@ -24,6 +26,7 @@ public class NodeGen {
 		//Constructs nodes to store them in the node type ArrayList
 		nodeTypes.add(new Spawn());
 		nodeTypes.add(new Shaft());
+		nodeTypes.add(new PoolCave());
 	}
 	
 	/**
@@ -56,6 +59,7 @@ public class NodeGen {
 	 * @param nodeOrigin is the position of the center of the node in chunk coordinates
 	 * @param nodeRotation is the amount the node is rotated in degrees
 	 * @return either the node index of the selected node, -1, or -2
+	 * @throws IOException 
 	 */
 	public static int selectNodes(World world, Random random, ChunkPos chunkPos,
 			BlockPos nodeOrigin, int nodeRotation, ArrayList<EnumFacing> facesLinked)	{
@@ -126,6 +130,13 @@ public class NodeGen {
 					i++;
 				}
 			}
+		}
+		
+		//Debug for new nodes
+		if (choiceIndex >= 0 && nodeTypes.get(choiceIndex) instanceof PoolCave
+				&& Math.abs(chunkPos.x) <= 2 && Math.abs(chunkPos.z) <= 2)	{
+			System.out.println("Placing PoolCave at " + chunkPos.toString());
+			System.out.println("Origin located at " + nodeOrigin.toString());
 		}
 		
 		//Return the index of the node that has been chosen

@@ -1,5 +1,7 @@
 package me.firstdwarf.underneath.world;
 
+import me.firstdwarf.underneath.utilities.Functions;
+import me.firstdwarf.underneath.world.dimension.CustomDimension;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DimensionType;
@@ -12,7 +14,7 @@ public class WorldProviderUnderneath extends WorldProvider {
 
     @Override
     public DimensionType getDimensionType() {
-        return UnderneathDimensions.underneathDimensionType;
+        return CustomDimension.underneathDimensionType;
     }
 
     @Override
@@ -89,7 +91,8 @@ public class WorldProviderUnderneath extends WorldProvider {
     
     @Override
     public BlockPos getRandomizedSpawnPoint() {
-        return this.getSpawnPoint();
+    	return new BlockPos(8, 245, 8);
+        //return this.getSpawnPoint();
     }
     
     @SideOnly(Side.CLIENT)

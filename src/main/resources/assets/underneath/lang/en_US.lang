@@ -1,4 +1,5 @@
 tile.underneath.exampleblock.name=Example Block
 tile.underneath.orecopper.name=Copper Ore
 tile.underneath.deepstone.name=Deep Stone
+tile.underneath.magmaticstone.name=Magmatic Stone
 itemGroup.underneathBlocks=underneath: Blocks

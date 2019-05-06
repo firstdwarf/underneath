@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 import me.firstdwarf.underneath.utilities.Functions;
+import me.firstdwarf.underneath.world.SaveData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
@@ -15,28 +16,35 @@ import net.minecraft.world.World;
 public abstract class Node	{
 	
 	//Useful IBlockState constant
-	protected final IBlockState AIR = Blocks.AIR.getDefaultState();
+	protected final IBlockState OPEN_AIR = Blocks.AIR.getDefaultState();
+	
+	protected final IBlockState STRUCT_AIR = Blocks.STRUCTURE_BLOCK.getDefaultState();
 	
 	//A list of entrances for the node
 	protected ArrayList<Entrance> entrances = new ArrayList<>();
 	
 	//A hashmap of the BlockPos and IBlockState for every block in the node. This should include air you want to guarantee
-	protected HashMap<BlockPos, IBlockState> stateMap = new HashMap<>();
+	protected HashMap<BlockPos, IBlockState> blockMap = new HashMap<>();
+	protected HashMap<BlockPos, Boolean> airMap = new HashMap<>();
+	protected HashMap<BlockPos, Boolean> waterMap = new HashMap<>();
 	private String name;
 	
 	//The minimum and maximum block positions of the node. This is used to check how much space is required
 	private BlockPos[] bounds = {new BlockPos(0, 0, 0), new BlockPos(0, 0, 0)};
 	
-	//TODO: Remove floor from caveGeneration cellular automaton
 	//The range around node blocks to generate a cave in. Currently includes the floor, but that should be fixed shortly
 	private int range;
+	
+	//Whether or not the floor of the node should be level
+	private boolean level;
 	
 	/**
 	 * Required constructor for all nodes. Add any extra entrances, call setStates, and flagBounds after this in your own constructor
 	 * @param name is the internal name for the node
 	 * @param range is the range around the node used in cave generation
+	 * @param level is whether or not the floor should be level
 	 */
-	public Node(String name, int range)	{
+	public Node(String name, int range, boolean level)	{
 		
 		//Add an entrance at (0, 0, 0) for every single non-spawn node. This means nodes should not extend in the -z direction
 		if (!name.equals("spawn"))	{
@@ -44,6 +52,7 @@ public abstract class Node	{
 		}
 		this.name = name;
 		this.range = range;
+		this.level = level;
 	}
 	
 	public String getName()	{
@@ -75,7 +84,17 @@ public abstract class Node	{
 	public void flagBounds()	{
 		BlockPos min = null;
 		BlockPos max = null;
-		for (BlockPos p : this.stateMap.keySet())	{
+		ArrayList<BlockPos> temp = new ArrayList<>();
+		for (BlockPos p : this.blockMap.keySet())	{
+			temp.add(p);
+		}
+		for (BlockPos p : this.waterMap.keySet())	{
+			temp.add(p);
+		}
+		for (BlockPos p : this.airMap.keySet())	{
+			temp.add(p);
+		}
+		for (BlockPos p : temp)	{
 			
 			//Set beginning max and min
 			if (min == null)	{
@@ -93,6 +112,7 @@ public abstract class Node	{
 			max = (p.getY() > max.getY()) ? new BlockPos(max.getX(), p.getY(), max.getZ()) : max;
 			max = (p.getZ() > max.getZ()) ? new BlockPos(max.getX(), max.getY(), p.getZ()) : max;
 		}
+		
 		this.bounds[0] = min;
 		this.bounds[1] = max;
 	}
@@ -103,8 +123,12 @@ public abstract class Node	{
 	
 	//Method to iterate through the stateMap for a node and set every state from it
 	public void placeStructures(World world, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation)	{
-		for (BlockPos s : this.stateMap.keySet())	{
-			Functions.setBlockFromNodeCoordinates(world, chunkPos, nodeOrigin, s, nodeRotation, this.stateMap.get(s));
+		BlockPos p;
+		for (BlockPos pos : this.blockMap.keySet())	{
+			p = Functions.nodeCoordsToWorldCoords(pos, chunkPos, nodeOrigin, nodeRotation);
+			Functions.placeBlockSafely(world, p, this.blockMap.get(pos));
+			System.out.println("Placed block " + this.blockMap.get(pos).getBlock().getRegistryName().toString());
+			//Functions.setBlockFromNodeCoordinates(world, chunkPos, nodeOrigin, pos, nodeRotation, this.blockMap.get(pos));
 		}
 	}
 	
@@ -117,6 +141,10 @@ public abstract class Node	{
 	 */
 	public void addCuboid(BlockPos min, BlockPos max, IBlockState state)	{
 		this.addCuboid(min.getX(), min.getY(), min.getZ(), max.getX(), max.getY(), max.getZ(), state);
+	}
+	
+	public void addWaterCuboid(BlockPos min, BlockPos max)	{
+		this.addWaterCuboid(min.getX(), min.getY(), min.getZ(), max.getX(), max.getY(), max.getZ());
 	}
 	
 	/**
@@ -134,7 +162,22 @@ public abstract class Node	{
 		for (int i = xMin; i <= xMax; i++)	{
 			for (int j = yMin; j <= yMax; j++)	{
 				for (int k = zMin; k <= zMax; k++)	{
-					this.stateMap.put(new BlockPos(i, j, k), state);
+					if (state.equals(this.OPEN_AIR))	{
+						this.airMap.put(new BlockPos(i, j, k), true);
+					}
+					else	{
+						this.blockMap.put(new BlockPos(i, j, k), state);
+					}
+				}
+			}
+		}
+	}
+	
+	public void addWaterCuboid(int xMin, int yMin, int zMin, int xMax, int yMax, int zMax)	{
+		for (int i = xMin; i <= xMax; i++)	{
+			for (int j = yMin; j <= yMax; j++)	{
+				for (int k = zMin; k <= zMax; k++)	{
+					this.waterMap.put(new BlockPos(i, j, k), true);
 				}
 			}
 		}
@@ -142,14 +185,47 @@ public abstract class Node	{
 	
 	//This method is called externally to place a cave around a node using the stateMap
 	public void generateCave(World world, Random random, ChunkPos chunkPos, BlockPos origin, int rotation)	{
-		IBlockState air = Blocks.AIR.getDefaultState();
-		HashMap<BlockPos, Boolean> airMap = Functions.generateCaveCell(random, this.stateMap, this.range);
+		HashMap<BlockPos, Boolean> airMap = Functions.generateCaveCell(random, this.blockMap, this.airMap, this.range, this.level);
+		HashMap<BlockPos, Boolean> waterMap = Functions.generateFluidCave(random, this.blockMap, this.waterMap,
+				this.range, this.level);
+		
+//		SaveData data = SaveData.getData(world);
+//		boolean markDirty = false;
+		
 		for (BlockPos target : airMap.keySet())	{
-			if (airMap.get(target) &&
-					world.getBlockState(Functions.nodeCoordsToWorldCoords(target, chunkPos, origin, rotation)) != air)	{
-				Functions.setBlockFromNodeCoordinates(world, chunkPos, origin, target, rotation, air);
+			if (airMap.get(target))	{
+				BlockPos worldCoords = Functions.nodeCoordsToWorldCoords(target, chunkPos, origin, rotation);
+				ChunkPos blockChunk = new ChunkPos(worldCoords.getX() >> 4, worldCoords.getZ() >> 4);
+				
+				Functions.placeBlockSafely(world, worldCoords, this.OPEN_AIR);
+				
+//				if (blockChunk.equals(chunkPos) || world.isChunkGeneratedAt(blockChunk.x, blockChunk.z))	{
+//					world.setBlockState(worldCoords, OPEN_AIR);
+//				}
+//				else	{
+//					if (data.airBlocks.containsKey(blockChunk.toString()))	{
+//						data.airBlocks.get(blockChunk.toString()).add(worldCoords);
+//					}
+//					else	{
+//						
+//						ArrayList<BlockPos> temp = new ArrayList<>();
+//						temp.add(worldCoords);
+//						data.airBlocks.put(blockChunk.toString(), temp);
+//						markDirty = true;
+//					}
+//				}
 			}
 		}
+		
+		for (BlockPos target : waterMap.keySet())	{
+			if (waterMap.get(target))	{
+				Functions.setBlockFromNodeCoordinates(world, chunkPos, origin, target, rotation, Blocks.WATER.getDefaultState());
+			}
+		}
+		
+//		if (markDirty)	{
+//			data.markDirty();
+//		}
 	}
 	
 	/**
@@ -160,6 +236,10 @@ public abstract class Node	{
 	 * @return an ArrayList of chunks needed for extra space
 	 */
 	public ArrayList<ChunkPos> checkNeighbors(ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation)	{
+		ArrayList<ChunkPos> flaggedChunks = new ArrayList<>();
+		if (this.bounds[0] == null || this.bounds[1] == null)	{
+			return flaggedChunks;
+		}
 		BlockPos chunkMax = Functions.nodeCoordsToChunkCoords(this.bounds[1], nodeOrigin, nodeRotation);
 		BlockPos chunkMin = Functions.nodeCoordsToChunkCoords(this.bounds[0], nodeOrigin, nodeRotation);
 		int maxXReach, minXReach, maxZReach, minZReach;
@@ -167,7 +247,6 @@ public abstract class Node	{
 		minXReach = (int) ((chunkMin.getX() >= 0) ? Math.floor((chunkMin.getX())/16.0) : Math.floor((chunkMin.getX()/16.0)));
 		maxZReach = (int) ((chunkMax.getZ() >= 0) ? Math.floor((chunkMax.getZ())/16.0) : Math.floor((chunkMax.getZ()/16.0)));
 		minZReach = (int) ((chunkMin.getZ() >= 0) ? Math.floor((chunkMin.getZ())/16.0) : Math.floor((chunkMin.getZ()/16.0)));
-		ArrayList<ChunkPos> flaggedChunks = new ArrayList<>();
 		//Flag chunks to the chunkMax corner
 		if (maxXReach >= 0)	{
 			if (maxZReach >= 0) {
@@ -255,12 +334,13 @@ public abstract class Node	{
 	}
 	
 	//Returns whether a node can fit at the given location, taking into account required entrance position. Call this from getWeight
-	public boolean checkSpace(World world, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation)	{
+	//TODO: Make this a lot smarter... in particular, allow overriding -1 while considering having a tunnel leading in
+	public boolean checkSpace(World world, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation, boolean newExits)	{
 		boolean canSpawn = true;
 		ArrayList<ChunkPos> flaggedChunks = this.checkNeighbors(chunkPos, nodeOrigin, nodeRotation);
 		for (ChunkPos p : flaggedChunks)	{
-			canSpawn &= !world.isChunkGeneratedAt(p.x, p.z);
-			canSpawn &= (NodeGen.chunkNodes.get(p.toString()) != null);
+			canSpawn &= (NodeGen.chunkNodes.get(p.toString()) == null || NodeGen.chunkNodes.get(p.toString()) == -1);
+			//canSpawn &= !world.isChunkGeneratedAt(p.x, p.z);
 		}
 		for (Entrance e : this.entrances)	{
 			e = e.rotateFacing(nodeRotation);
@@ -270,6 +350,9 @@ public abstract class Node	{
 			case NORTH:
 				eChunk = new ChunkPos(eChunk.x, eChunk.z - 1);
 				if (world.isChunkGeneratedAt(eChunk.x, eChunk.z))	{
+					if (this.entrances.indexOf(e) != 0 && newExits)	{
+						canSpawn = false;
+					}
 					world.getChunkFromChunkCoords(eChunk.x, eChunk.z);
 					byte[] loadedTags = TunnelGen.chunkTunnelEndpoints.get(eChunk.toString());
 					canSpawn &= (loadedTags[0] & 0x04) != 0;
@@ -278,6 +361,9 @@ public abstract class Node	{
 			case SOUTH:
 				eChunk = new ChunkPos(eChunk.x, eChunk.z + 1);
 				if (world.isChunkGeneratedAt(eChunk.x, eChunk.z))	{
+					if (this.entrances.indexOf(e) != 0 && newExits)	{
+						canSpawn = false;
+					}
 					world.getChunkFromChunkCoords(eChunk.x, eChunk.z);
 					byte[] loadedTags = TunnelGen.chunkTunnelEndpoints.get(eChunk.toString());
 					canSpawn &= (loadedTags[0] & 0x08) != 0;
@@ -286,6 +372,9 @@ public abstract class Node	{
 			case WEST:
 				eChunk = new ChunkPos(eChunk.x - 1, eChunk.z);
 				if (world.isChunkGeneratedAt(eChunk.x, eChunk.z))	{
+					if (this.entrances.indexOf(e) != 0 && newExits)	{
+						canSpawn = false;
+					}
 					world.getChunkFromChunkCoords(eChunk.x, eChunk.z);
 					byte[] loadedTags = TunnelGen.chunkTunnelEndpoints.get(eChunk.toString());
 					canSpawn &= (loadedTags[0] & 0x01) != 0;
@@ -294,6 +383,9 @@ public abstract class Node	{
 			case EAST:
 				eChunk = new ChunkPos(eChunk.x + 1, eChunk.z);
 				if (world.isChunkGeneratedAt(eChunk.x, eChunk.z))	{
+					if (this.entrances.indexOf(e) != 0 && newExits)	{
+						canSpawn = false;
+					}
 					world.getChunkFromChunkCoords(eChunk.x, eChunk.z);
 					byte[] loadedTags = TunnelGen.chunkTunnelEndpoints.get(eChunk.toString());
 					canSpawn &= (loadedTags[0] & 0x02) != 0;

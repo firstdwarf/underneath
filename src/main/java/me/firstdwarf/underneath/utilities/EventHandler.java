@@ -5,8 +5,9 @@ import java.util.ArrayList;
 import me.firstdwarf.underneath.block.BlockMain;
 import me.firstdwarf.underneath.block.NaturalBlock;
 import me.firstdwarf.underneath.block.OreBlock;
-import me.firstdwarf.underneath.world.UnderneathDimensions;
+import me.firstdwarf.underneath.block.TileBlock;
 import me.firstdwarf.underneath.world.SaveData;
+import me.firstdwarf.underneath.world.dimension.CustomDimension;
 import me.firstdwarf.underneath.world.node.Entrance;
 import me.firstdwarf.underneath.world.node.NodeGen;
 import me.firstdwarf.underneath.world.node.TunnelGen;
@@ -33,16 +34,18 @@ import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public class EventHandler {
 	@SubscribeEvent
 	public static void registerBlocks(RegistryEvent.Register<Block> event)	{
 		BlockMain.createBlocks();
-		for(NaturalBlock block : BlockMain.naturalBlockList)	{
+		for (NaturalBlock block : BlockMain.naturalBlockList)	{
 			event.getRegistry().register(block);
 		}
-		for(OreBlock block : BlockMain.oreBlockList)	{
+		for (OreBlock block : BlockMain.oreBlockList)	{
+			event.getRegistry().register(block);
+		}
+		for (TileBlock block : BlockMain.tileBlockList)	{
 			event.getRegistry().register(block);
 		}
 	}
@@ -52,6 +55,9 @@ public class EventHandler {
 			event.getRegistry().register(new ItemBlock(block).setRegistryName(block.getRegistryName()));
 		}
 		for(OreBlock block : BlockMain.oreBlockList)	{
+			event.getRegistry().register(new ItemBlock(block).setRegistryName(block.getRegistryName()));
+		}
+		for (TileBlock block : BlockMain.tileBlockList)	{
 			event.getRegistry().register(new ItemBlock(block).setRegistryName(block.getRegistryName()));
 		}
 	}
@@ -79,7 +85,7 @@ public class EventHandler {
 			if (e.getSource() == DamageSource.IN_WALL)	{
 				
 				//Fired if it's our dimension
-				if (world.provider.getDimensionType().equals(UnderneathDimensions.underneathDimensionType))	{
+				if (world.provider.getDimensionType().equals(CustomDimension.underneathDimensionType))	{
 					
 					//Get the player's position
 					int x = MathHelper.floor(p.posX);
@@ -119,7 +125,7 @@ public class EventHandler {
 						
 						//Execute tp command
 						s.getCommandManager().executeCommand(s,
-								"/tp " + p.getName() + " " + pos.getX() + " " + (pos.getY() + 1) + " " + pos.getZ());
+								"/tp " + p.getName() + " " + pos.getX() + " " + (pos.getY()) + " " + pos.getZ());
 						
 						//Prevent the player from being hurt by the suffocation
 						e.setCanceled(true);
@@ -145,7 +151,7 @@ public class EventHandler {
 		if (!world.isRemote)	{
 			
 			//Check if the chunk is from one of our dimensions
-			if (world.provider.getDimensionType().equals(UnderneathDimensions.underneathDimensionType))	{
+			if (world.provider.getDimensionType().equals(CustomDimension.underneathDimensionType))	{
 				
 				//System.out.println("Loading data for chunk " + pos.toString());
 				
@@ -199,7 +205,7 @@ public class EventHandler {
 		if (!world.isRemote)	{
 			
 			//Check if the chunk is from one of our dimensions
-			if (world.provider.getDimensionType().equals(UnderneathDimensions.underneathDimensionType))	{
+			if (world.provider.getDimensionType().equals(CustomDimension.underneathDimensionType))	{
 				
 				//System.out.println("Saving data for chunk " + pos.toString());
 				
@@ -260,8 +266,12 @@ public class EventHandler {
 		if (!world.isRemote)	{
 			
 			//Check if the world is one of our dimensions
-			if (world.provider.getDimensionType().equals(UnderneathDimensions.underneathDimensionType))	{
-				
+			if (world.provider.getDimensionType().equals(CustomDimension.underneathDimensionType))	{
+				ChunkSaveFile save;
+				for (ChunkPos pos : CustomDimension.chunkSaves.keySet())	{
+					save = CustomDimension.chunkSaves.get(pos);
+					save.saveMap();
+				}
 			}
 		}
 	}
@@ -275,12 +285,13 @@ public class EventHandler {
 		if (!world.isRemote)	{
 			
 			//Check if the world is one of our dimensions
-			if (world.provider.getDimensionType().equals(UnderneathDimensions.underneathDimensionType))	{
+			if (world.provider.getDimensionType().equals(CustomDimension.underneathDimensionType))	{
 				
 				//Clear the ConcurrentHashMaps storing chunk node and tunnel data. This is done in case the chunks don't unload fully
 				TunnelGen.chunkTunnelEndpoints.clear();
 				NodeGen.chunkNodes.clear();
 				NodeGen.chunkEntrances.clear();
+//				NodeGen.chunkAirMap.clear();
 			}
 		}
 	}
@@ -293,8 +304,9 @@ public class EventHandler {
 		if (!world.isRemote)	{
 					
 			//Check if the world is one of our dimensions
-			if (world.provider.getDimensionType().equals(UnderneathDimensions.underneathDimensionType))	{
-				
+			if (world.provider.getDimensionType().equals(CustomDimension.underneathDimensionType))	{
+//				SaveData data = SaveData.getData(world);
+//				NodeGen.chunkAirMap = data.airBlocks;
 			}
 		}
 	}

@@ -1,14 +1,21 @@
-package me.firstdwarf.underneath.world;
+package me.firstdwarf.underneath.world.dimension;
 
 import me.firstdwarf.underneath.core.Underneath;
+import me.firstdwarf.underneath.utilities.ChunkSaveFile;
+import me.firstdwarf.underneath.world.WorldProviderUnderneath;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraftforge.common.DimensionManager;
+
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.logging.log4j.Level;
 
-public class UnderneathDimensions {
+public class CustomDimension {
 
     // Dimension types for new dimensions get created here
     public static DimensionType underneathDimensionType;
+    public static ConcurrentHashMap<ChunkPos, ChunkSaveFile> chunkSaves;
 
     /**
      * Initialize our custom dimensions:
@@ -17,6 +24,7 @@ public class UnderneathDimensions {
     public static void init() {
         registerDimensionTypes();
         registerDimensions();
+        chunkSaves = new ConcurrentHashMap<>(0);
     }
     
     //DimensionManager.getNextFreeDimId()
