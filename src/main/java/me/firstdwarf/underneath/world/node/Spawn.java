@@ -28,10 +28,7 @@ public class Spawn extends Node	{
 
 	@Override
 	public void setStates() {
-//		super.addCuboid(new BlockPos(-5, 0, -5), new BlockPos(5, 3, 5), this.OPEN_AIR);
-//		super.addCuboid(new BlockPos(0, 0, 0), new BlockPos(0, 7, 0), this.OPEN_AIR);
-		
-		super.addCuboid(new BlockPos(-10, 0, -10), new BlockPos(10, 3, 10), this.OPEN_AIR);
+		super.addCuboid(new BlockPos(-5, 0, -5), new BlockPos(5, 3, 5), this.OPEN_AIR);
 		super.addCuboid(new BlockPos(0, 0, 0), new BlockPos(0, 7, 0), this.OPEN_AIR);
 		
 		this.blockMap.put(new BlockPos(0, 8, 0), Blocks.BONE_BLOCK.getDefaultState());

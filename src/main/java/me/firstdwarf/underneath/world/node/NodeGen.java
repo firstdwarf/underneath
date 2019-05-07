@@ -2,14 +2,19 @@ package me.firstdwarf.underneath.world.node;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.firstdwarf.underneath.core.Config;
+import me.firstdwarf.underneath.utilities.ChunkSaveFile;
+import me.firstdwarf.underneath.utilities.Functions;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.ChunkPrimer;
 
 public class NodeGen {
 	
@@ -48,6 +53,35 @@ public class NodeGen {
 			node.generateCave(world, random, chunkPos, nodeOrigin, nodeRotation);
 			node.placeStructures(world, chunkPos, nodeOrigin, nodeRotation);
 		}
+	}
+	
+	public static ChunkPrimer setupNode(Random random, ChunkPrimer chunkPrimer, World world, ChunkPos chunkPos,
+			Node node, BlockPos nodeOrigin, int nodeRotation)	{
+		
+		if (node != null)	{
+			ChunkSaveFile save;
+			HashMap<BlockPos, IBlockState> stateMap = node.generateStateMap(random, nodeOrigin, nodeRotation);
+//			System.out.println("Retrieved stateMap for chunk " + chunkPos.toString());
+		
+			BlockPos p1;
+			ChunkPos p2;
+			for (BlockPos pos : stateMap.keySet())	{
+				p1 = Functions.nodeCoordsToChunkCoords(pos, nodeOrigin, nodeRotation);
+				if (Functions.isInChunkPrimer(p1))	{
+					chunkPrimer.setBlockState(p1.getX(), p1.getY(), p1.getZ(), stateMap.get(pos));
+					//System.out.println("Setting block for node " + node.getName() + " at " + p1.toString());
+				}
+				else	{
+					//System.out.println("Saving block that would be set at " + p1.toString());
+					p1 = Functions.chunkCoordsToWorldCoords(p1, chunkPos);
+					//System.out.println("World coords are " + p1.toString());
+					p2 = new ChunkPos(p1.getX() >> 4, p1.getZ() >> 4);
+					save = ChunkSaveFile.getSave(world, p2, true);
+					save.addToMap(p1, stateMap.get(pos));
+				}
+			}
+		}
+		return chunkPrimer;
 	}
 	
 	//TODO: Make sure this takes neighbors into account in each node's getWeight method

@@ -2,6 +2,7 @@ package me.firstdwarf.underneath.world.dimension;
 
 import me.firstdwarf.underneath.core.Underneath;
 import me.firstdwarf.underneath.utilities.ChunkSaveFile;
+import me.firstdwarf.underneath.utilities.NodeMapFile;
 import me.firstdwarf.underneath.world.WorldProviderUnderneath;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;

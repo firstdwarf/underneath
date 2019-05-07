@@ -154,6 +154,7 @@ public class EventHandler {
 			if (world.provider.getDimensionType().equals(CustomDimension.underneathDimensionType))	{
 				
 				//System.out.println("Loading data for chunk " + pos.toString());
+//				ChunkSaveFile save = ChunkSaveFile.getSave(world, pos, false);
 				
 				//Load chunk tunnel endpoint and node data into their respective ConcurrentHashMaps from nbt data
 				TunnelGen.chunkTunnelEndpoints.put(pos.toString(), nbt.getByteArray(pos.toString() + ".tunnels"));
@@ -291,6 +292,7 @@ public class EventHandler {
 				TunnelGen.chunkTunnelEndpoints.clear();
 				NodeGen.chunkNodes.clear();
 				NodeGen.chunkEntrances.clear();
+				CustomDimension.chunkSaves.clear();
 //				NodeGen.chunkAirMap.clear();
 			}
 		}

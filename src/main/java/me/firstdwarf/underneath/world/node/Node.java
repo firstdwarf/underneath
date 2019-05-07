@@ -3,6 +3,7 @@ package me.firstdwarf.underneath.world.node;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 import me.firstdwarf.underneath.utilities.Functions;
 import me.firstdwarf.underneath.world.SaveData;
@@ -18,15 +19,13 @@ public abstract class Node	{
 	//Useful IBlockState constant
 	protected final IBlockState OPEN_AIR = Blocks.AIR.getDefaultState();
 	
-	protected final IBlockState STRUCT_AIR = Blocks.STRUCTURE_BLOCK.getDefaultState();
-	
 	//A list of entrances for the node
 	protected ArrayList<Entrance> entrances = new ArrayList<>();
 	
 	//A hashmap of the BlockPos and IBlockState for every block in the node. This should include air you want to guarantee
-	protected HashMap<BlockPos, IBlockState> blockMap = new HashMap<>();
-	protected HashMap<BlockPos, Boolean> airMap = new HashMap<>();
-	protected HashMap<BlockPos, Boolean> waterMap = new HashMap<>();
+	protected HashMap<BlockPos, IBlockState> blockMap = new HashMap<>(0);
+	protected HashMap<BlockPos, Boolean> airMap = new HashMap<>(0);
+	protected HashMap<BlockPos, Boolean> waterMap = new HashMap<>(0);
 	private String name;
 	
 	//The minimum and maximum block positions of the node. This is used to check how much space is required
@@ -126,8 +125,8 @@ public abstract class Node	{
 		BlockPos p;
 		for (BlockPos pos : this.blockMap.keySet())	{
 			p = Functions.nodeCoordsToWorldCoords(pos, chunkPos, nodeOrigin, nodeRotation);
+			//System.out.println("Placed block safely: " + this.blockMap.get(pos).getBlock().getRegistryName().toString());
 			Functions.placeBlockSafely(world, p, this.blockMap.get(pos));
-			System.out.println("Placed block " + this.blockMap.get(pos).getBlock().getRegistryName().toString());
 			//Functions.setBlockFromNodeCoordinates(world, chunkPos, nodeOrigin, pos, nodeRotation, this.blockMap.get(pos));
 		}
 	}
@@ -183,6 +182,35 @@ public abstract class Node	{
 		}
 	}
 	
+	public HashMap<BlockPos, IBlockState>	generateStateMap(Random random, BlockPos origin, int rotation)	{
+		HashMap<BlockPos, IBlockState> stateMap = new HashMap<>(0);
+		
+		int priorSize = blockMap.size() + airMap.size() + waterMap.size();
+		
+		HashMap<BlockPos, Boolean> tempAirMap = Functions.generateCaveCell(random, this.blockMap, this.airMap, this.range, this.level);
+		HashMap<BlockPos, Boolean> tempWaterMap = Functions.generateFluidCave(random, this.blockMap, this.waterMap,
+				this.range, this.level);
+		
+		
+		for (BlockPos pos : tempAirMap.keySet())	{
+			if (tempAirMap.get(pos))	{
+				stateMap.put(pos, this.OPEN_AIR);
+			}
+		}
+		for (BlockPos pos : tempWaterMap.keySet())	{
+			if (tempWaterMap.get(pos))	{
+				stateMap.put(pos, Blocks.WATER.getDefaultState());
+			}
+		}
+		for (BlockPos pos : this.blockMap.keySet())	{
+			stateMap.put(pos, blockMap.get(pos));
+		}
+		
+//		System.out.println("Returning state map for node "  + this.getName());
+//		System.out.println("Map of size " + priorSize + " grew to size " + stateMap.size());
+		return stateMap;
+	}
+	
 	//This method is called externally to place a cave around a node using the stateMap
 	public void generateCave(World world, Random random, ChunkPos chunkPos, BlockPos origin, int rotation)	{
 		HashMap<BlockPos, Boolean> airMap = Functions.generateCaveCell(random, this.blockMap, this.airMap, this.range, this.level);
@@ -195,7 +223,7 @@ public abstract class Node	{
 		for (BlockPos target : airMap.keySet())	{
 			if (airMap.get(target))	{
 				BlockPos worldCoords = Functions.nodeCoordsToWorldCoords(target, chunkPos, origin, rotation);
-				ChunkPos blockChunk = new ChunkPos(worldCoords.getX() >> 4, worldCoords.getZ() >> 4);
+				ChunkPos chunk = new ChunkPos(worldCoords.getX() >> 4, worldCoords.getZ() >> 4);
 				
 				Functions.placeBlockSafely(world, worldCoords, this.OPEN_AIR);
 				

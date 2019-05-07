@@ -1,6 +1,7 @@
 package me.firstdwarf.underneath.utilities;
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -43,11 +44,11 @@ public class ChunkSaveFile {
 		
 		if (canCreateFile)	{
 			try {
-				if (!this.file.getParentFile().mkdir())	{
+				if (!this.file.getParentFile().mkdir() && !this.file.getParentFile().exists())	{
 					Underneath.logger.error("Failed to create parent directory for file " + fileName);
 				}
 				if (this.file.createNewFile())	{
-					System.out.println(this.file.getPath());
+					this.hasFile = true;
 				}
 			} catch (IOException e) {
 				Underneath.logger.error("Failed to create file " + fileName);
@@ -83,12 +84,11 @@ public class ChunkSaveFile {
 				fileIn.close();
 				dataIn.close();
 			}
-			else	{
-				System.out.println("Fuck you old man you ain't got no file");
-			}
 		} catch (FileNotFoundException e) {
 			Underneath.logger.error("Could not find file " + fileName);
 			e.printStackTrace();
+		} catch (EOFException e)	{
+			
 		} catch (IOException e) {
 			Underneath.logger.error("Could not read from file " + fileName);
 			e.printStackTrace();
@@ -103,30 +103,37 @@ public class ChunkSaveFile {
 	
 	//Adds a blockstate and position to the statemap for this chunk
 	public void addToMap(BlockPos pos, IBlockState state)	{
+		
+//		System.out.println("Added state to map for chunk " + this.chunkPos.toString());
 		this.stateMap.put(pos, state);
 	}
 	
 	//Saves the data from the statemap into nbt and writes it to a file
 	public void saveMap()	{
-		NBTTagList posList = new NBTTagList();
-		NBTTagList stateList = new NBTTagList();
 		
-		BlockPos localCoords;
-		byte[] data;
-		String stateString;
+		if (this.hasFile)	{
+			NBTTagList posList = new NBTTagList();
+			NBTTagList stateList = new NBTTagList();
 		
-		for (BlockPos pos : this.stateMap.keySet())	{
-			localCoords = Functions.worldCoordsToChunkCoords(pos);
-			data = new byte[] {(byte) ((byte) localCoords.getX() << 4 | (byte) localCoords.getZ() & 0x0f), (byte) localCoords.getY()};
-			stateString = this.stateMap.get(pos).getBlock().getRegistryName().toString();
-			posList.appendTag(new NBTTagString(stateString));
-			stateList.appendTag(new NBTTagByteArray(data));
+			BlockPos localCoords;
+			byte[] data;
+			String stateString;
+		
+			for (BlockPos pos : this.stateMap.keySet())	{
+				localCoords = Functions.worldCoordsToChunkCoords(pos);
+				data = new byte[] {(byte) ((byte) localCoords.getX() << 4 | (byte) localCoords.getZ() & 0x0f), (byte) localCoords.getY()};
+				stateString = this.stateMap.get(pos).getBlock().getRegistryName().toString();
+				//System.out.println("Saving position data " + data[0] + ", " + data[1]);
+				//System.out.println("Saving state data " + stateString);
+				posList.appendTag(new NBTTagString(stateString));
+				stateList.appendTag(new NBTTagByteArray(data));
+			}
+			NBTTagCompound nbt = new NBTTagCompound();
+			nbt.setTag("pos", posList);
+			nbt.setTag("states", stateList);
+		
+			this.writeData(nbt);
 		}
-		NBTTagCompound nbt = new NBTTagCompound();
-		nbt.setTag("pos", posList);
-		nbt.setTag("states", stateList);
-		
-		this.writeData(nbt);
 	}
 	
 	//Loads data from file into statemap
@@ -143,6 +150,7 @@ public class ChunkSaveFile {
 			String stateString;
 			
 			if (this.stateMap == null)	{
+				System.out.println("Clearing stateMap for chunk " + this.chunkPos.toString());
 				this.stateMap = new ConcurrentHashMap<>(0);
 			}
 			
@@ -161,10 +169,11 @@ public class ChunkSaveFile {
 	public void setBlocksFromMap(World world)	{
 		
 		if (this.hasFile)	{
+			System.out.println("Setting blocks from map for chunk " + this.chunkPos.toString());
 			this.loadMap();
 			for (BlockPos pos : this.stateMap.keySet())	{
-				System.out.println("Set block at " + pos.toString() +
-						" to state " + this.stateMap.get(pos).getBlock().getRegistryName().toString());
+//				System.out.println("Set block at " + pos.toString() +
+//						" to state " + this.stateMap.get(pos).getBlock().getRegistryName().toString());
 				world.setBlockState(pos, this.stateMap.get(pos));
 			}
 		}
@@ -173,7 +182,7 @@ public class ChunkSaveFile {
 	//Retrieves a save object, creating it if one isn't already in memory- this is independent from file creation
 	public static ChunkSaveFile getSave(World world, ChunkPos chunkPos, boolean canCreateFile)	{
 		if (CustomDimension.chunkSaves.containsKey(chunkPos))	{
-			System.out.println("Returning map from memory for chunk " + chunkPos.toString());
+			//System.out.println("Returning map from memory for chunk " + chunkPos.toString());
 			return CustomDimension.chunkSaves.get(chunkPos);
 		}
 		else	{

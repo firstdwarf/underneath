@@ -80,6 +80,7 @@ public class Functions {
 	}
 	
 	//TODO: Consider allowing finer control of cave generation- perhaps on a per-node basis
+	//TODO: This is important! Some small ranges are negatively impacted by rules
 	public static HashMap<BlockPos, Boolean> generateCaveCell(Random random, HashMap<BlockPos, IBlockState> blockMap,
 			HashMap<BlockPos, Boolean> airMap, int range, boolean level)	{
 		int ymin = level ? 0 : -1*range;
@@ -170,18 +171,29 @@ public class Functions {
 		return tempMap;
 	}
 
+	public static boolean isInChunk(BlockPos pos, ChunkPos chunkPos)	{
+		return (pos.getX() >= chunkPos.getXStart() && pos.getX() <= chunkPos.getXEnd() &&
+				pos.getZ() >= chunkPos.getZStart() && pos.getZ() <= chunkPos.getZEnd());
+	}
+	
+	public static boolean isInChunkPrimer(BlockPos pos)	{
+		return (pos.getX() >= 0 && pos.getX() <= 15 && pos.getZ() >= 0 && pos.getZ() <= 15);
+	}
+	
 	public static void placeBlockSafely(World world, BlockPos pos, IBlockState state)	{
 		
 		ChunkPos chunkPos = new ChunkPos(pos.getX() >> 4, pos.getZ() >> 4);
 //		if (!(world.isBlockLoaded(pos) && world.getBlockState(pos).equals(state)))	{
-			if (world.isChunkGeneratedAt(chunkPos.x, chunkPos.z))	{
+			if (world.isChunkGeneratedAt(chunkPos.x, chunkPos.z) && world.isBlockLoaded(pos))	{
 //				System.out.println("Chunk is " + chunkPos.toString());
 //				System.out.println("Position is " + pos.toString());
+//				System.out.println("Setting block at " + pos.toString() + " in chunk " + chunkPos.toString());
 				world.setBlockState(pos, state);
-				System.out.println("Set block in chunk " + chunkPos.toString());
+				//System.out.println("Set block in chunk " + chunkPos.toString());
 			}
 			else	{
-				System.out.println("Saving additional data for chunk " + chunkPos.toString());
+				System.out.println("Adding block " + state.getBlock().getRegistryName().toString() +
+						" at position " + pos.toString());
 				ChunkSaveFile save = ChunkSaveFile.getSave(world, chunkPos, true);
 				save.addToMap(pos, state);
 			}

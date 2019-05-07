@@ -17,6 +17,7 @@ import javax.annotation.Nullable;
 import me.firstdwarf.underneath.block.BlockMain;
 import me.firstdwarf.underneath.core.Config;
 import me.firstdwarf.underneath.utilities.ChunkSaveFile;
+import me.firstdwarf.underneath.utilities.NodeMapFile;
 import me.firstdwarf.underneath.world.dimension.CustomDimension;
 import me.firstdwarf.underneath.world.node.Node;
 import me.firstdwarf.underneath.world.node.NodeGen;
@@ -32,6 +33,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
     private World world;
     private Random random;
     private Decorator decorator;
+    private NodeMapFile nodeMap;
 
     /**
      * Constructor
@@ -42,6 +44,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
     public ChunkGeneratorUnderneath(World world, long seed) {
         this.world = world;
         this.random = new Random(seed);
+        this.nodeMap = new NodeMapFile(world);
     }
 
     //Called whenever a chunk is generated. The first chunk generated in an empty world is the chunk the player is in
@@ -226,8 +229,15 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         //Links all tunnel endpoints as needed, generating caves- node entrances to chunk sides, chunk sides to common midpoint, etc
     	chunkPrimer = TunnelGen.generateTunnelLinks(random, world, chunkPrimer, x, z, node, nodeOrigin, nodeRotation, nodeIndex);
     	
+    	if (node != null)	{
+    		this.nodeMap.writeNode(node, nodeOrigin, chunkPos);
+    	}
+    	chunkPrimer = NodeGen.setupNode(random, chunkPrimer, world, chunkPos, node, nodeOrigin, nodeRotation);
+    	
     	//Copies chunkPrimer into chunk object and returns it
         Chunk chunk = new Chunk(this.world, chunkPrimer, x, z);
+//        chunk.checkLight();
+//        chunk.setTerrainPopulated(false);
         return chunk;
     }
 
@@ -242,6 +252,8 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
     	
     	//Position of the chunk to populate
     	ChunkPos chunkPos = new ChunkPos(x, z);
+    	
+    	//System.out.println("Populating chunk at " + chunkPos.toString());
     	
     	/*
     	 * Retrieve node placement information from a ConcurrentHashMap.
@@ -263,7 +275,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
     	}
     	
     	//Generate the node in question, placing all blocks in the node, clearing out a cave, etc
-    	NodeGen.generateNodes(world, random, chunkPos, node, nodeOrigin, nodeRotation);
+//    	NodeGen.generateNodes(world, random, chunkPos, node, nodeOrigin, nodeRotation);
     	
     	ChunkSaveFile chunkData = ChunkSaveFile.getSave(world, chunkPos, false);
     	chunkData.setBlocksFromMap(world);
@@ -301,6 +313,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
             	}
             }
     	}
+    	world.getChunkFromChunkCoords(x, z).checkLight();
     	world.getChunkFromChunkCoords(x, z).resetRelightChecks();
     }
 

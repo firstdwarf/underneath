@@ -12,9 +12,9 @@ import net.minecraft.world.World;
 public class PoolCave extends Node {
 
 	public PoolCave() {
-		super("PoolCave", 2, true);
+		super("PoolCave", 3, true);
 		this.setStates();
-		this.flagBounds();
+		super.flagBounds();
 	}
 
 	//TODO: Make sure you can check for total tunnel count- this is a dead end node
@@ -30,10 +30,10 @@ public class PoolCave extends Node {
 
 	@Override
 	public void setStates() {
-		this.addCuboid(-3, 0, 0, 3, 3, 6, this.OPEN_AIR);
-		this.addCuboid(-1, 0, 4, 1, 0, 4, Blocks.WATER.getDefaultState());
-		this.addCuboid(0, 0, 3, 0, 0, 5, Blocks.WATER.getDefaultState());
-		this.addWaterCuboid(0, -80, 5, 0, -1, 5);
+		super.addCuboid(-3, 0, 0, 3, 3, 6, this.OPEN_AIR);
+		super.addCuboid(-1, -1, 4, 1, -1, 4, Blocks.WATER.getDefaultState());
+		super.addCuboid(0, -1, 3, 0, -1, 5, Blocks.WATER.getDefaultState());
+		super.addWaterCuboid(0, -20, 3, 0, -2, 5);
 	}
 
 }
