@@ -1,4 +1,4 @@
-package me.firstdwarf.underneath.world.node;
+package me.firstdwarf.underneath.world;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import me.firstdwarf.underneath.core.Config;
 import me.firstdwarf.underneath.utilities.Functions;
+import me.firstdwarf.underneath.world.node.Entrance;
+import me.firstdwarf.underneath.world.node.Node;
+import me.firstdwarf.underneath.world.node.NodeGen;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -731,9 +734,6 @@ public class TunnelGen {
 			
 			//Records the current position of the algorithm in the HashMap of block positions
 			airMap.put(p1, false);
-			
-			//Currently sets the block at the algorithm's position to lapis. This line can simply be removed
-			//chunkPrimer.setBlockState(p1.getX(), p1.getY(), p1.getZ(), Blocks.LAPIS_BLOCK.getDefaultState());
 			
 			//Find the difference between the algorithm's current position and the target position
 			xDelta = p1.getX() - p2.getX();

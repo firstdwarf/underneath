@@ -1,4 +1,4 @@
-package me.firstdwarf.underneath.utilities;
+package me.firstdwarf.underneath.save;
 
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.firstdwarf.underneath.core.Underneath;
+import me.firstdwarf.underneath.utilities.Functions;
 import me.firstdwarf.underneath.world.dimension.CustomDimension;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -66,7 +67,7 @@ public class ChunkSaveFile {
 	private void writeData(NBTTagCompound nbt)	{
 		try {
 			CompressedStreamTools.write(nbt, file);
-			System.out.println("Wrote to file " + file.getPath());
+			//System.out.println("Wrote to file " + file.getPath());
 		} catch (IOException e) {
 			Underneath.logger.error("Failed to write to file " + fileName);
 			e.printStackTrace();
@@ -160,6 +161,8 @@ public class ChunkSaveFile {
 				state = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(stateString)).getDefaultState();
 				pos = new BlockPos(data[0] >> 4 & 0x0f, data[1] & 0xff, data[0] & 0x0f);
 				pos = Functions.chunkCoordsToWorldCoords(pos, chunkPos);
+				System.out.println("Recovered data for chunk " + this.chunkPos.toString() + " as "
+						+ pos.toString() + " " + stateString);
 				this.stateMap.put(pos, state);
 			}
 		}
@@ -169,7 +172,7 @@ public class ChunkSaveFile {
 	public void setBlocksFromMap(World world)	{
 		
 		if (this.hasFile)	{
-			System.out.println("Setting blocks from map for chunk " + this.chunkPos.toString());
+			//System.out.println("Setting blocks from map for chunk " + this.chunkPos.toString());
 			this.loadMap();
 			for (BlockPos pos : this.stateMap.keySet())	{
 //				System.out.println("Set block at " + pos.toString() +

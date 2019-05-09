@@ -16,14 +16,16 @@ import javax.annotation.Nullable;
 
 import me.firstdwarf.underneath.block.BlockMain;
 import me.firstdwarf.underneath.core.Config;
-import me.firstdwarf.underneath.utilities.ChunkSaveFile;
-import me.firstdwarf.underneath.utilities.NodeMapFile;
+import me.firstdwarf.underneath.save.ChunkSaveFile;
+import me.firstdwarf.underneath.save.NodeMapFile;
+import me.firstdwarf.underneath.save.SaveData;
+import me.firstdwarf.underneath.utilities.Functions;
 import me.firstdwarf.underneath.world.dimension.CustomDimension;
 import me.firstdwarf.underneath.world.node.Node;
 import me.firstdwarf.underneath.world.node.NodeGen;
-import me.firstdwarf.underneath.world.node.TunnelGen;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -183,7 +185,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
          * This chunk shouldn't have an entry yet (it's still being generated).
          * If it does, another chunk flagged it because its node needed more room.
          */
-        //TODO: Make sure that the -2's get stored to world data
+        //TODO: Actually, change this up so that there are no -2's; can potentially set to match overflow
         if (NodeGen.chunkNodes.containsKey(chunkPos.toString()))	{
         	//Sets the node index to -2 if it has been flagged as -2 (the space needed flag)
         	if (NodeGen.chunkNodes.get(chunkPos.toString()) == -2)	{
@@ -216,6 +218,8 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
         	node.flagNeighbors(chunkPos, nodeOrigin, nodeRotation);
         }
         
+        //TODO: This information probably isn't necessary... consider only recording node type
+        
         //Place node selection and placement information in a ConcurrentHashMap
         NodeGen.chunkNodes.put(chunkPos.toString(), nodeIndex);
         NodeGen.chunkNodes.put(chunkPos.toString() + ".rotation", nodeRotation);
@@ -236,6 +240,7 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
     	
     	//Copies chunkPrimer into chunk object and returns it
         Chunk chunk = new Chunk(this.world, chunkPrimer, x, z);
+        
 //        chunk.checkLight();
 //        chunk.setTerrainPopulated(false);
         return chunk;
@@ -253,42 +258,12 @@ public class ChunkGeneratorUnderneath implements IChunkGenerator {
     	//Position of the chunk to populate
     	ChunkPos chunkPos = new ChunkPos(x, z);
     	
-    	//System.out.println("Populating chunk at " + chunkPos.toString());
-    	
-    	/*
-    	 * Retrieve node placement information from a ConcurrentHashMap.
-    	 * Populate is only called for loaded chunks, so the map has entries.
-    	 * (See EventHandler)
-    	 */
-    	int nodeIndex = NodeGen.chunkNodes.get(chunkPos.toString());
-    	int nodeRotation = NodeGen.chunkNodes.get(chunkPos.toString() + ".rotation");
-    	BlockPos nodeOrigin = new BlockPos(NodeGen.chunkNodes.get(chunkPos.toString() + ".origin.x"),
-    			NodeGen.chunkNodes.get(chunkPos.toString() + ".origin.y"),
-    			NodeGen.chunkNodes.get(chunkPos.toString() + ".origin.z"));
-    	
-    	//Retrieve node object from an ArrayList of nodes if one was selected
-    	if (nodeIndex >= 0)	{
-    		node = NodeGen.nodeTypes.get(nodeIndex);
-    	}
-    	else	{
-    		node = null;
-    	}
-    	
-    	//Generate the node in question, placing all blocks in the node, clearing out a cave, etc
-//    	NodeGen.generateNodes(world, random, chunkPos, node, nodeOrigin, nodeRotation);
-    	
+    	//Load up a chunk data map and set the blocks from it
     	ChunkSaveFile chunkData = ChunkSaveFile.getSave(world, chunkPos, false);
     	chunkData.setBlocksFromMap(world);
-    	chunkData.clearData();
     	
-//    	SaveData data = SaveData.getData(world);
-//    	if (data.airBlocks.containsKey(chunkPos.toString()))	{
-//    		for (BlockPos p : data.airBlocks.get(chunkPos.toString()))	{
-//    			world.setBlockState(p, Blocks.AIR.getDefaultState());
-//    		}
-//    		data.airBlocks.remove(chunkPos.toString());
-//    		data.toClear.add(chunkPos.toString());
-//    	}
+    	//Currently does nothing
+    	chunkData.clearData();
     	
     	//Generates veins of materials
     	//this.decorator.generateVeins(world, random, chunkPos);

@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Random;
 
 import me.firstdwarf.underneath.core.Config;
-import me.firstdwarf.underneath.world.SaveData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -180,26 +179,6 @@ public class Functions {
 		return (pos.getX() >= 0 && pos.getX() <= 15 && pos.getZ() >= 0 && pos.getZ() <= 15);
 	}
 	
-	public static void placeBlockSafely(World world, BlockPos pos, IBlockState state)	{
-		
-		ChunkPos chunkPos = new ChunkPos(pos.getX() >> 4, pos.getZ() >> 4);
-//		if (!(world.isBlockLoaded(pos) && world.getBlockState(pos).equals(state)))	{
-			if (world.isChunkGeneratedAt(chunkPos.x, chunkPos.z) && world.isBlockLoaded(pos))	{
-//				System.out.println("Chunk is " + chunkPos.toString());
-//				System.out.println("Position is " + pos.toString());
-//				System.out.println("Setting block at " + pos.toString() + " in chunk " + chunkPos.toString());
-				world.setBlockState(pos, state);
-				//System.out.println("Set block in chunk " + chunkPos.toString());
-			}
-			else	{
-				System.out.println("Adding block " + state.getBlock().getRegistryName().toString() +
-						" at position " + pos.toString());
-				ChunkSaveFile save = ChunkSaveFile.getSave(world, chunkPos, true);
-				save.addToMap(pos, state);
-			}
-//		}
-	}
-	
 	public static BlockPos addCoords(BlockPos c1, BlockPos c2)	{
 		return new BlockPos(c1.getX() + c2.getX(), c1.getY() + c2.getY(), c1.getZ() + c2.getZ());
 	}
@@ -223,7 +202,6 @@ public class Functions {
 		origin = chunkPos.getBlock(origin.getX(), origin.getY(), origin.getZ());
 		switch (rotation)	{
 		case 0:
-			Functions.placeBlockSafely(world, coords, state);
 			world.setBlockState(new BlockPos(coords.getX() + origin.getX(), coords.getY() + origin.getY(),
 					coords.getZ() + origin.getZ()), state, flag);
 			break;

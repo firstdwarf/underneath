@@ -1,4 +1,4 @@
-package me.firstdwarf.underneath.utilities;
+package me.firstdwarf.underneath.save;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import me.firstdwarf.underneath.core.Underneath;
+import me.firstdwarf.underneath.utilities.Functions;
 import me.firstdwarf.underneath.world.node.Node;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -34,7 +35,7 @@ public class NodeMapFile {
 	public void writeNode(Node node, BlockPos nodeOrigin, ChunkPos chunkPos)	{
 		
 		String nodeData = "Creating node type " + node.getName() + " in chunk " + chunkPos.toString() + " with origin at block "
-				+ nodeOrigin.toString() + System.lineSeparator();
+				+ Functions.chunkCoordsToWorldCoords(nodeOrigin, chunkPos).toString() + System.lineSeparator();
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(this.file, true));
 //			System.out.println("Writing: " + nodeData);

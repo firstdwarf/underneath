@@ -5,8 +5,9 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
+import me.firstdwarf.underneath.save.SaveData;
 import me.firstdwarf.underneath.utilities.Functions;
-import me.firstdwarf.underneath.world.SaveData;
+import me.firstdwarf.underneath.world.TunnelGen;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
@@ -77,6 +78,11 @@ public abstract class Node	{
 	 */
 	public abstract void setStates();
 	
+	//Getter for the node bounds
+	public BlockPos[] getBounds()	{
+		return this.bounds;
+	}
+	
 	/**
 	 * This method is used to set the bounds of the node from the state map. Call this from the constructor AFTER setStates
 	 */
@@ -124,13 +130,11 @@ public abstract class Node	{
 	public void placeStructures(World world, ChunkPos chunkPos, BlockPos nodeOrigin, int nodeRotation)	{
 		BlockPos p;
 		for (BlockPos pos : this.blockMap.keySet())	{
-			p = Functions.nodeCoordsToWorldCoords(pos, chunkPos, nodeOrigin, nodeRotation);
-			//System.out.println("Placed block safely: " + this.blockMap.get(pos).getBlock().getRegistryName().toString());
-			Functions.placeBlockSafely(world, p, this.blockMap.get(pos));
 			//Functions.setBlockFromNodeCoordinates(world, chunkPos, nodeOrigin, pos, nodeRotation, this.blockMap.get(pos));
 		}
 	}
 	
+	//TODO: Rework state system to use less maps or implement auto-generating cells
 	/**
 	 * This function adds a cuboid of identical IBlockStates between minimum and maximum block positions to the stateMap.
 	 * It is extremely useful, if a little difficult to use. Take care when placing cuboids and entrances
@@ -144,6 +148,49 @@ public abstract class Node	{
 	
 	public void addWaterCuboid(BlockPos min, BlockPos max)	{
 		this.addWaterCuboid(min.getX(), min.getY(), min.getZ(), max.getX(), max.getY(), max.getZ());
+	}
+	
+	public void addCylinder(BlockPos center, int radius, int height, IBlockState state)	{
+		this.addCylinder(center.getX(), center.getY(), center.getZ(), radius, height, state);
+	}
+	
+	public void addCylinder(int x, int y, int z, int radius, int height, IBlockState state)	{
+		int kBound;
+		for (int i = -1*radius; i <= radius; i++)	{
+			for (int j = 0; j < height; j++)	{
+				kBound = (int) Math.floor(Math.sqrt(radius*radius - i*i));
+				for (int k = -1*kBound; k <= kBound; k++)	{
+					if (!state.equals(this.OPEN_AIR))	{
+						this.blockMap.put(new BlockPos(x + i, y + j, z + k), state);
+					}
+					else	{
+						this.airMap.put(new BlockPos(x + i, y + j, z + k), true);
+					}
+				}
+			}
+		}
+	}
+	
+	public void addSphere(BlockPos center, int radius, IBlockState state)	{
+		this.addSphere(center.getX(), center.getY(), center.getZ(), radius, state);
+	}
+	
+	public void addSphere(int x, int y, int z, int radius, IBlockState state)	{
+		int jBound, kBound;
+		for (int i = -1*radius; i <= radius; i++)	{
+			jBound = (int) Math.floor(Math.sqrt(radius*radius - i*i));
+			for (int j = -1*jBound; j <= jBound; j++)	{
+				kBound = (int) Math.floor(Math.sqrt(radius*radius - i*i - j*j));
+				for (int k = -1*kBound; k <= kBound; k++)	{
+					if (!state.equals(this.OPEN_AIR))	{
+						this.blockMap.put(new BlockPos(x + i, y + j, z + k), state);
+					}
+					else	{
+						this.airMap.put(new BlockPos(x + i, y + j, z + k), true);
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -185,8 +232,6 @@ public abstract class Node	{
 	public HashMap<BlockPos, IBlockState>	generateStateMap(Random random, BlockPos origin, int rotation)	{
 		HashMap<BlockPos, IBlockState> stateMap = new HashMap<>(0);
 		
-		int priorSize = blockMap.size() + airMap.size() + waterMap.size();
-		
 		HashMap<BlockPos, Boolean> tempAirMap = Functions.generateCaveCell(random, this.blockMap, this.airMap, this.range, this.level);
 		HashMap<BlockPos, Boolean> tempWaterMap = Functions.generateFluidCave(random, this.blockMap, this.waterMap,
 				this.range, this.level);
@@ -205,9 +250,6 @@ public abstract class Node	{
 		for (BlockPos pos : this.blockMap.keySet())	{
 			stateMap.put(pos, blockMap.get(pos));
 		}
-		
-//		System.out.println("Returning state map for node "  + this.getName());
-//		System.out.println("Map of size " + priorSize + " grew to size " + stateMap.size());
 		return stateMap;
 	}
 	
@@ -217,31 +259,8 @@ public abstract class Node	{
 		HashMap<BlockPos, Boolean> waterMap = Functions.generateFluidCave(random, this.blockMap, this.waterMap,
 				this.range, this.level);
 		
-//		SaveData data = SaveData.getData(world);
-//		boolean markDirty = false;
-		
 		for (BlockPos target : airMap.keySet())	{
 			if (airMap.get(target))	{
-				BlockPos worldCoords = Functions.nodeCoordsToWorldCoords(target, chunkPos, origin, rotation);
-				ChunkPos chunk = new ChunkPos(worldCoords.getX() >> 4, worldCoords.getZ() >> 4);
-				
-				Functions.placeBlockSafely(world, worldCoords, this.OPEN_AIR);
-				
-//				if (blockChunk.equals(chunkPos) || world.isChunkGeneratedAt(blockChunk.x, blockChunk.z))	{
-//					world.setBlockState(worldCoords, OPEN_AIR);
-//				}
-//				else	{
-//					if (data.airBlocks.containsKey(blockChunk.toString()))	{
-//						data.airBlocks.get(blockChunk.toString()).add(worldCoords);
-//					}
-//					else	{
-//						
-//						ArrayList<BlockPos> temp = new ArrayList<>();
-//						temp.add(worldCoords);
-//						data.airBlocks.put(blockChunk.toString(), temp);
-//						markDirty = true;
-//					}
-//				}
 			}
 		}
 		
@@ -432,7 +451,6 @@ public abstract class Node	{
 		if (!flaggedChunks.isEmpty())	{
 			for(ChunkPos c : flaggedChunks)	{
 				if (!NodeGen.chunkNodes.containsKey(c.toString()))	{
-					System.out.println("Flagged chunk: " + c.toString());
 					NodeGen.chunkNodes.put(c.toString(), -2);
 				}
 			}
@@ -440,16 +458,14 @@ public abstract class Node	{
 		//Store present entrances
 		for(Entrance e : this.entrances)	{
 			e = e.rotateFacing(nodeRotation);
-			ArrayList<Entrance> chunkEntrances = new ArrayList<>();
 			BlockPos eWorldCoords = Functions.nodeCoordsToWorldCoords(e.coords, chunkPos, nodeOrigin, nodeRotation);
 			ChunkPos eChunk = new ChunkPos(eWorldCoords.getX() >> 4, eWorldCoords.getZ() >> 4);
 			e = e.setCoords(Functions.worldCoordsToChunkCoords(eWorldCoords));
 			if (NodeGen.chunkEntrances.containsKey(eChunk.toString()))	{
-				chunkEntrances = NodeGen.chunkEntrances.get(eChunk.toString());
-				chunkEntrances.add(e);
-				NodeGen.chunkEntrances.put(eChunk.toString(), chunkEntrances);
+				NodeGen.chunkEntrances.get(eChunk.toString()).add(e);
 			}
 			else	{
+				ArrayList<Entrance> chunkEntrances = new ArrayList<>(1);
 				chunkEntrances.add(e);
 				NodeGen.chunkEntrances.put(eChunk.toString(), chunkEntrances);
 			}

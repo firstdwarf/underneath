@@ -49,7 +49,7 @@ public class TileMagmaticStone extends TileEntity implements ITickable	{
 		if (!world.isRemote)	{
 			if (this.counter == 19)	{
 				this.counter = 0;
-				System.out.println("Checking tile entity!");
+				System.out.println("Ticking tile entity at " + this.getPos().toString());
 			
 				if (this.capacity > 0)	{
 					int[] offset = {-1, 1};
@@ -57,10 +57,7 @@ public class TileMagmaticStone extends TileEntity implements ITickable	{
 					for (int x : offset)	{
 						neighbor = new BlockPos(this.pos.getX() + x, this.pos.getY(), this.pos.getZ());
 						if (this.world.isBlockLoaded(neighbor))	{
-							//System.out.println(neighbor.toString());
-							//System.out.println(this.world.getBlockState(neighbor).toString());
 							if (this.world.getBlockState(neighbor).equals(Blocks.GLOWSTONE.getDefaultState()))	{
-								//System.out.println("Found Glowstone");
 								this.capacity--;
 							}
 						}
@@ -68,10 +65,7 @@ public class TileMagmaticStone extends TileEntity implements ITickable	{
 					for (int z : offset)	{
 						neighbor = new BlockPos(this.pos.getX(), this.pos.getY(), this.pos.getZ() + z);
 						if (this.world.isBlockLoaded(neighbor))	{
-							//System.out.println(neighbor.toString());
-							//System.out.println(this.world.getBlockState(neighbor).toString());
 							if (this.world.getBlockState(neighbor).equals(Blocks.GLOWSTONE.getDefaultState()))	{
-								//System.out.println("Found Glowstone");
 								this.capacity--;
 							}
 						}

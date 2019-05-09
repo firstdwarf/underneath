@@ -1,7 +1,7 @@
 package me.firstdwarf.underneath.command;
 
+import me.firstdwarf.underneath.save.SaveData;
 import me.firstdwarf.underneath.world.CustomTeleporter;
-import me.firstdwarf.underneath.world.SaveData;
 import me.firstdwarf.underneath.world.dimension.CustomDimension;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;

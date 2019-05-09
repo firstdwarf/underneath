@@ -1,8 +1,8 @@
 package me.firstdwarf.underneath.world.dimension;
 
 import me.firstdwarf.underneath.core.Underneath;
-import me.firstdwarf.underneath.utilities.ChunkSaveFile;
-import me.firstdwarf.underneath.utilities.NodeMapFile;
+import me.firstdwarf.underneath.save.ChunkSaveFile;
+import me.firstdwarf.underneath.save.NodeMapFile;
 import me.firstdwarf.underneath.world.WorldProviderUnderneath;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
@@ -14,6 +14,8 @@ import org.apache.logging.log4j.Level;
 
 public class CustomDimension {
 
+	//TODO: Rework data types to allow for multiple dimensions
+	
     // Dimension types for new dimensions get created here
     public static DimensionType underneathDimensionType;
     public static ConcurrentHashMap<ChunkPos, ChunkSaveFile> chunkSaves;
@@ -35,8 +37,5 @@ public class CustomDimension {
 
     private static void registerDimensions() {
         DimensionManager.registerDimension(underneathDimensionType.getId(), underneathDimensionType);
-
-        // TODO: Debug -- remove this later
-        Underneath.instance.logger.log(Level.DEBUG, "Created Underneath Dimension with ID: " + underneathDimensionType.getId());
     }
 }

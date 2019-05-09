@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import me.firstdwarf.underneath.save.SaveData;
 import me.firstdwarf.underneath.world.ChunkGeneratorUnderneath;
 import me.firstdwarf.underneath.world.CustomTeleporter;
-import me.firstdwarf.underneath.world.SaveData;
 import me.firstdwarf.underneath.world.dimension.CustomDimension;
 import me.firstdwarf.underneath.world.node.Spawn;
 import net.minecraft.block.Block;
@@ -31,7 +31,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public class DynamicLightingHandler {
-	//TODO: Rethink this a lot... look at overworld lag
+	//TODO: Basically, remove this or severely neuter it...
 	
 	private static Map<UUID, List<BlockPos>> locations = new HashMap<>();
 	private static ConcurrentHashMap<UUID, BlockPos> lightLocation = new ConcurrentHashMap<>();

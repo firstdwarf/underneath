@@ -7,9 +7,10 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.firstdwarf.underneath.core.Config;
-import me.firstdwarf.underneath.utilities.ChunkSaveFile;
+import me.firstdwarf.underneath.save.ChunkSaveFile;
 import me.firstdwarf.underneath.utilities.Functions;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -32,6 +33,7 @@ public class NodeGen {
 		nodeTypes.add(new Spawn());
 		nodeTypes.add(new Shaft());
 		nodeTypes.add(new PoolCave());
+		nodeTypes.add(new AncientForge());
 	}
 	
 	/**
@@ -55,8 +57,13 @@ public class NodeGen {
 		}
 	}
 	
-	public static ChunkPrimer setupNode(Random random, ChunkPrimer chunkPrimer, World world, ChunkPos chunkPos,
-			Node node, BlockPos nodeOrigin, int nodeRotation)	{
+	//This method is used to return a node child using a graph-based approach
+	public static Node selectChild()	{
+		return null;
+	}
+	
+	public static ChunkPrimer setupNode(Random random, ChunkPrimer chunkPrimer,
+			World world, ChunkPos chunkPos, Node node, BlockPos nodeOrigin, int nodeRotation)	{
 		
 		if (node != null)	{
 			ChunkSaveFile save;
@@ -68,7 +75,17 @@ public class NodeGen {
 			for (BlockPos pos : stateMap.keySet())	{
 				p1 = Functions.nodeCoordsToChunkCoords(pos, nodeOrigin, nodeRotation);
 				if (Functions.isInChunkPrimer(p1))	{
-					chunkPrimer.setBlockState(p1.getX(), p1.getY(), p1.getZ(), stateMap.get(pos));
+					if (stateMap.get(pos).getBlock().hasTileEntity(stateMap.get(pos)))	{
+						p1 = Functions.chunkCoordsToWorldCoords(p1, chunkPos);
+						//System.out.println("World coords are " + p1.toString());
+						p2 = new ChunkPos(p1.getX() >> 4, p1.getZ() >> 4);
+						save = ChunkSaveFile.getSave(world, p2, true);
+						save.addToMap(p1, stateMap.get(pos));
+					}
+					else	{
+						chunkPrimer.setBlockState(p1.getX(), p1.getY(), p1.getZ(), stateMap.get(pos));
+					}
+					
 					//System.out.println("Setting block for node " + node.getName() + " at " + p1.toString());
 				}
 				else	{
@@ -164,13 +181,6 @@ public class NodeGen {
 					i++;
 				}
 			}
-		}
-		
-		//Debug for new nodes
-		if (choiceIndex >= 0 && nodeTypes.get(choiceIndex) instanceof PoolCave
-				&& Math.abs(chunkPos.x) <= 2 && Math.abs(chunkPos.z) <= 2)	{
-			System.out.println("Placing PoolCave at " + chunkPos.toString());
-			System.out.println("Origin located at " + nodeOrigin.toString());
 		}
 		
 		//Return the index of the node that has been chosen
