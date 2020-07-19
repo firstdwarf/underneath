@@ -1,7 +1,7 @@
 {
   "variants": {
     "":  {
-      "model": "examplemod:block/grass"
+      "model": "underneath:block/porter"
     }
   }
 }

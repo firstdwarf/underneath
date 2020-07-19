@@ -1,7 +1,7 @@
 {
   "variants": {
     "":  {
-      "model": "examplemod:block/cat"
+      "model": "underneath:block/cat"
     }
   }
 }

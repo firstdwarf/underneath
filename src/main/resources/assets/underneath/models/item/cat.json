@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "examplemod:item/cat"
+    "layer0": "underneath:item/cat"
   }
 }

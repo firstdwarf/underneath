@@ -1,8 +1,8 @@
-package com.example.examplemod;
+package com.firstdwarf.underneath.item;
 
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 
 public class ItemWrapper {
@@ -11,7 +11,7 @@ public class ItemWrapper {
 
     public static void makeItem(RegistryEvent.Register<Item> itemRegistryEvent) {
         Item.Properties brewingItemProps = new Item.Properties().group(ItemGroup.BREWING);
-        testItem = new Item(brewingItemProps).setRegistryName("examplemod:cat");
+        testItem = new Item(brewingItemProps).setRegistryName(new ResourceLocation("underneath:cat"));
         itemRegistryEvent.getRegistry().register(testItem);
     }
 }

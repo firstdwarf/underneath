@@ -1,7 +1,7 @@
 {
   "variants": {
     "":  {
-      "model": "examplemod:block/sun"
+      "model": "underneath:block/sun"
     }
   }
 }
