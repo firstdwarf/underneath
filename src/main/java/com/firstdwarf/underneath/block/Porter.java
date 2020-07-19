@@ -1,5 +1,7 @@
 package com.firstdwarf.underneath.block;
 
+import com.firstdwarf.underneath.world.DimensionWrapper;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,7 +26,7 @@ public class Porter extends Block {
 	    } else {
 	    	System.out.println("Click!");
 	    	if (!worldIn.isRemote) {
-	    		player.changeDimension((worldIn.dimension.getType() == DimensionType.THE_END) ? DimensionType.OVERWORLD : DimensionType.THE_END);
+	    		player.changeDimension((worldIn.dimension.getType() == DimensionWrapper.underneathTop) ? DimensionType.OVERWORLD : DimensionWrapper.underneathTop);
 	  	    }
 	        return ActionResultType.SUCCESS;
 	    }

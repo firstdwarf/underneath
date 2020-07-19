@@ -6,7 +6,9 @@ import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.ModDimension;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.world.RegisterDimensionsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
@@ -21,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.firstdwarf.underneath.block.BlockWrapper;
 import com.firstdwarf.underneath.item.ItemWrapper;
+import com.firstdwarf.underneath.world.DimensionWrapper;
 
 import java.util.stream.Collectors;
 
@@ -29,7 +32,7 @@ import java.util.stream.Collectors;
 public class Underneath
 {
     // Directly reference a log4j logger.
-    private static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger UnderneathLogger = LogManager.getLogger();
 
     public Underneath() {
         // Register the setup method for modloading
@@ -48,25 +51,25 @@ public class Underneath
     private void setup(final FMLCommonSetupEvent event)
     {
         // some preinit code
-        LOGGER.info("HELLO FROM PREINIT");
-        LOGGER.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
+        UnderneathLogger.info("HELLO FROM PREINIT");
+        UnderneathLogger.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
         // do something that can only be done on the client
-        LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
+        UnderneathLogger.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event)
     {
         // some example code to dispatch IMC to another mod
-        InterModComms.sendTo("examplemod", "helloworld", () -> { LOGGER.info("Hello world from the MDK"); return "Hello world";});
+        InterModComms.sendTo("examplemod", "helloworld", () -> { UnderneathLogger.info("Hello world from the MDK"); return "Hello world";});
     }
 
     private void processIMC(final InterModProcessEvent event)
     {
         // some example code to receive and process InterModComms from other mods
-        LOGGER.info("Got IMC {}", event.getIMCStream().
+        UnderneathLogger.info("Got IMC {}", event.getIMCStream().
                 map(m->m.getMessageSupplier().get()).
                 collect(Collectors.toList()));
     }
@@ -74,7 +77,7 @@ public class Underneath
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
         // do something when the server starts
-        LOGGER.info("HELLO from server starting");
+        UnderneathLogger.info("HELLO from server starting");
     }
 
     // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
@@ -83,21 +86,21 @@ public class Underneath
     public static class RegistryEvents {
 
         @SubscribeEvent
-        public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
-            // register a new block here
-            LOGGER.info("HELLO from Register Block");
-
-            //START new code
-            BlockWrapper.makeBlock(blockRegistryEvent);
-            //END new code
+        public static void onBlocksRegistry(final RegistryEvent.Register<Block> e) {
+            UnderneathLogger.info("HELLO from Register Block");
+            BlockWrapper.makeBlock(e);
         }
 
-        //START new code
         @SubscribeEvent
-        public static void onItemRegistry(final RegistryEvent.Register<Item> itemRegistryEvent) {
-            BlockWrapper.makeBlockItem(itemRegistryEvent);
-            ItemWrapper.makeItem(itemRegistryEvent);
+        public static void onItemRegistry(final RegistryEvent.Register<Item> e) {
+            BlockWrapper.makeBlockItem(e);
+            ItemWrapper.makeItem(e);
         }
-        //END new code
+        
+        @SubscribeEvent
+        public static void onDimensionFactoryRegistry(final RegistryEvent.Register<ModDimension> e) {
+        	UnderneathLogger.info("NOOT NOOT 2");
+            DimensionWrapper.makeTemplate(e);
+        }
     }
 }
