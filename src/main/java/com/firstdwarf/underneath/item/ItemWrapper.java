@@ -11,7 +11,7 @@ public class ItemWrapper {
 
     public static void makeItem(RegistryEvent.Register<Item> itemRegistryEvent) {
         Item.Properties brewingItemProps = new Item.Properties().group(ItemGroup.BREWING);
-        testItem = new Item(brewingItemProps).setRegistryName(new ResourceLocation("underneath:cat"));
+        testItem = new FinderItem(brewingItemProps).setRegistryName(new ResourceLocation("underneath:cat"));
         itemRegistryEvent.getRegistry().register(testItem);
     }
 }

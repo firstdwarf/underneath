@@ -1,14 +1,18 @@
 package com.firstdwarf.underneath;
 
+import com.firstdwarf.underneath.biome.BiomeWrapper;
+import com.firstdwarf.underneath.world.UnderneathDimension;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.ModDimension;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.world.RegisterDimensionsEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
@@ -29,12 +33,19 @@ import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod("underneath")
+//@Mod.EventBusSubscriber(modid = Underneath.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class Underneath
 {
+    public static final String MOD_ID = "underneath";
+
     // Directly reference a log4j logger.
     public static final Logger UnderneathLogger = LogManager.getLogger();
 
     public Underneath() {
+//        final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+
+        BiomeWrapper.BIOMES.register(FMLJavaModLoadingContext.get().getModEventBus());
+
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         // Register the enqueueIMC method for modloading
@@ -84,6 +95,12 @@ public class Underneath
     // Event bus for receiving Registry Events)
     @Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD)
     public static class RegistryEvents {
+
+        @SubscribeEvent
+        public static void onRegisterBiomes(final RegistryEvent.Register<Biome> event) {
+            UnderneathLogger.info("HELLO from biome registry");
+            BiomeWrapper.registerBiomes();
+        }
 
         @SubscribeEvent
         public static void onBlocksRegistry(final RegistryEvent.Register<Block> e) {
