@@ -7,6 +7,8 @@ import net.minecraft.world.biome.DefaultBiomeFeatures;
 import net.minecraft.world.gen.GenerationStage;
 import net.minecraft.world.gen.carver.WorldCarver;
 import net.minecraft.world.gen.feature.ProbabilityConfig;
+import net.minecraftforge.common.BiomeDictionary;
+//import sun.jvm.hotspot.memory.Generation;
 
 public class ExampleBiome extends Biome {
     public ExampleBiome(Builder biomeBuilder) {
