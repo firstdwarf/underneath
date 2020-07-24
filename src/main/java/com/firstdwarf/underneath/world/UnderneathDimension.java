@@ -48,10 +48,11 @@ public class UnderneathDimension extends Dimension {
 		//Delicious pasta
 		WorldType worldtype = this.world.getWorldInfo().getGenerator();
 		ChunkGeneratorType<OverworldGenSettings, OverworldChunkGenerator> overworldGenerator = ChunkGeneratorType.SURFACE;
-		BiomeProviderType<SingleBiomeProviderSettings, SingleBiomeProvider> biomeprovidertype = BiomeProviderType.FIXED;
-		BiomeProviderType<OverworldBiomeProviderSettings, OverworldBiomeProvider> biomeprovidertype1 = BiomeProviderType.VANILLA_LAYERED;
-		BiomeProviderType<CheckerboardBiomeProviderSettings, CheckerboardBiomeProvider> biomeprovidertype2 = BiomeProviderType.CHECKERBOARD;
+		BiomeProviderType<SingleBiomeProviderSettings, SingleBiomeProvider> fixed = BiomeProviderType.FIXED;
+		BiomeProviderType<OverworldBiomeProviderSettings, OverworldBiomeProvider> layered = BiomeProviderType.VANILLA_LAYERED;
+		BiomeProviderType<CheckerboardBiomeProviderSettings, CheckerboardBiomeProvider> checkered = BiomeProviderType.CHECKERBOARD;
 		
+		BiomeProvider bp = null;
 		
 		BiomeProvider biomeprovider = null;
 	    JsonElement jsonelement = Dynamic.convert(NBTDynamicOps.INSTANCE, JsonOps.INSTANCE, this.world.getWorldInfo().getGeneratorOptions());
@@ -71,24 +72,24 @@ public class UnderneathDimension extends Dimension {
 	    	}
 	
 	    	if (BiomeProviderType.FIXED == biomeprovidertype3) {
-	    		SingleBiomeProviderSettings singlebiomeprovidersettings2 = biomeprovidertype.createSettings(this.world.getWorldInfo()).setBiome(abiome[0]);
-	    		biomeprovider = biomeprovidertype.create(singlebiomeprovidersettings2);
+	    		SingleBiomeProviderSettings singlebiomeprovidersettings2 = fixed.createSettings(this.world.getWorldInfo()).setBiome(abiome[0]);
+	    		biomeprovider = fixed.create(singlebiomeprovidersettings2);
 	    	}
 	
 	    	if (BiomeProviderType.CHECKERBOARD == biomeprovidertype3) {
 	    		int j = jsonobject2.has("size") ? jsonobject2.getAsJsonPrimitive("size").getAsInt() : 2;
-	    		CheckerboardBiomeProviderSettings checkerboardbiomeprovidersettings = biomeprovidertype2.createSettings(this.world.getWorldInfo()).setBiomes(abiome).setSize(j);
-	    		biomeprovider = biomeprovidertype2.create(checkerboardbiomeprovidersettings);
+	    		CheckerboardBiomeProviderSettings checkerboardbiomeprovidersettings = checkered.createSettings(this.world.getWorldInfo()).setBiomes(abiome).setSize(j);
+	    		biomeprovider = checkered.create(checkerboardbiomeprovidersettings);
 	    	}
 	
 	    	if (BiomeProviderType.VANILLA_LAYERED == biomeprovidertype3) {
-	    		OverworldBiomeProviderSettings overworldbiomeprovidersettings1 = biomeprovidertype1.createSettings(this.world.getWorldInfo());
-	    		biomeprovider = biomeprovidertype1.create(overworldbiomeprovidersettings1);
+	    		OverworldBiomeProviderSettings overworldbiomeprovidersettings1 = layered.createSettings(this.world.getWorldInfo());
+	    		biomeprovider = layered.create(overworldbiomeprovidersettings1);
 	    	}
 	    }
 	
 	    if (biomeprovider == null) {
-	    	biomeprovider = biomeprovidertype.create(biomeprovidertype.createSettings(this.world.getWorldInfo()).setBiome(Biomes.OCEAN));
+	    	biomeprovider = fixed.create(fixed.createSettings(this.world.getWorldInfo()).setBiome(Biomes.OCEAN));
 	    }
 	
 		BlockState stoneState = Blocks.STONE.getDefaultState();
@@ -110,7 +111,8 @@ public class UnderneathDimension extends Dimension {
 		OverworldGenSettings overworldgensettings1 = overworldGenerator.createSettings();
 		overworldgensettings1.setDefaultBlock(stoneState);
 		overworldgensettings1.setDefaultFluid(waterState);
-		return overworldGenerator.create(this.world, biomeprovider, overworldgensettings1);
+		return new UnderneathChunkGenerator(this.world, biomeprovider, overworldgensettings1);
+		//return overworldGenerator.create(this.world, biomeprovider, overworldgensettings1);
 	}
 
 	@Override
@@ -183,7 +185,7 @@ public class UnderneathDimension extends Dimension {
 	      f2 = f2 * (f * 0.94F + 0.06F);
 	      f3 = f3 * (f * 0.91F + 0.09F);
 	      //return new Vec3d((double)f1, (double)f2, (double)f3);
-	      return new Vec3d(1, 1, 1);
+	      return new Vec3d(0, 0, 0);
 	}
 
 	@Override

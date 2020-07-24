@@ -2,5 +2,7 @@
   "block.underneath.grass": "Grass Rock",
   "block.underneath.sun": "Sun Rock",
   "block.underneath.porter": "Porter",
+  "block.underneath.deep_stone": "Deep Stone",
+  "itemGroup.deep_blocks": "Deep Blocks",
   "item.underneath.cat": "Cat Thing"
 }
